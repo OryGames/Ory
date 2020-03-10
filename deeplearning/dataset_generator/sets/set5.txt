@@ -1,0 +1,9 @@
+inicio=(300~500),(200~220)
+andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,up,1
+zzz=last['x']+(-3~3),last['y']+(-3~3)+64+5,none,1
+pular=last['x']+(-3~3),last['y']+(-3~3)+64+5,right,2
+andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,up,8
+andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,left,5
+pegar=last['x']+(-3~3),last['y']+(-3~3)+64+5,left,3
+andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,right,4
+circulo=last['x']+(-3~3),last['y']+(-3~3)+64+5,none,7
