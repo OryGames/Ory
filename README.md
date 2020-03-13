@@ -26,4 +26,4 @@ O projeto visa conseguir disponibilizar uma experiência similar ao '[Osmo codin
 
 * Qualquer um poderá baixar o software (open source), recortar as peças e colocar as crianças para brincar.
 
-<img src="res/osi.png" height="200" />
+<img src="res/osi_standard_logo.png" height="200" />
