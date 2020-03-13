@@ -12,10 +12,18 @@ O projeto visa conseguir disponibilizar uma experiência similar ao '[Osmo codin
 * Elaborar workshops que ocorrerão com educadores, incluindo desde a confecção das peças, baixar o software e colocar para rodar, e dar uma aula completa para as crianças.
 
 ## Como funciona?
+* A cada nível, um desafio é proposto. Por exemplo, fazer o personagem chegar na bandeirinha vermelha.
+
+<img src="res/image1.png" height="300" />
 
 * As crianças deverão montar uma sequência de peças para fazer seu robô chegar na bandeira conforme a imagem abaixo.
 
-![](res/image3.png =200x200)
+<img src="res/image3.png" height="200" />
 
 * As peças podem ser impressas em papel, papel magnético ou EVA na própria escola.
-* Qualquer um pode baixar o software (open source), recortar as peças e colocar as crianças para brincar.
+
+<img src="res/image2.png" height="200" />
+
+* Qualquer um poderá baixar o software (open source), recortar as peças e colocar as crianças para brincar.
+
+<img src="res/osi.png" height="200" />
