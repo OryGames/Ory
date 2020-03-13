@@ -11,6 +11,8 @@ O projeto visa conseguir disponibilizar uma experiência similar ao '[Osmo codin
 
 * Elaborar workshops que ocorrerão com educadores, incluindo desde a confecção das peças, baixar o software e colocar para rodar, e dar uma aula completa para as crianças.
 
+* Desenvolver diferentes níveis de desafios e jogos temáticos.
+
 ## Como funciona?
 * A cada nível, um desafio é proposto. Por exemplo, fazer o personagem chegar na bandeirinha vermelha.
 
