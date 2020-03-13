@@ -15,7 +15,7 @@ O projeto visa conseguir disponibilizar uma experiência similar ao '[Osmo codin
 
 * As crianças deverão montar uma sequência de peças para fazer seu robô chegar na bandeira conforme a imagem abaixo.
 
-![](res/image3.png |width=200)
+![](res/image3.png =200x200)
 
 * As peças podem ser impressas em papel, papel magnético ou EVA na própria escola.
 * Qualquer um pode baixar o software (open source), recortar as peças e colocar as crianças para brincar.
