@@ -12,20 +12,11 @@ class LevelScene extends Phaser.Scene {
     }
 
     preload() {
+        // First, load the level JSON to get tileset config
         this.load.json(`level${this.levelId}`, `./assets/levels/level${this.levelId}.json`);
-
-        this.load.spritesheet('tileset', './assets/sprites/tile.png', {
-            frameWidth: 16,
-            frameHeight: 16
-        });
-
-        this.load.spritesheet('collectibles', './assets/sprites/collectibles.png', {
-            frameWidth: 64,
-            frameHeight: 64
-        });
-        this.load.image('robot', './assets/sprites/robot.png');
     }
 
+    // Use create to load assets after JSON is available
     create() {
         this.levelData = this.cache.json.get(`level${this.levelId}`);
 
@@ -34,18 +25,72 @@ class LevelScene extends Phaser.Scene {
             return;
         }
 
+        // Get tileset config from level data, with defaults
+        const tilesetConfig = this.levelData.tileset || {
+            path: './assets/sprites/tile.png',
+            cols: 11,
+            rows: 7,
+            tileSize: 32
+        };
+
+        this.tilesetCols = tilesetConfig.cols;
+        this.tilesetTileSize = tilesetConfig.tileSize;
+
+        // Load tileset dynamically - need to use loader in create
+        this.load.spritesheet('tileset', tilesetConfig.path, {
+            frameWidth: tilesetConfig.tileSize,
+            frameHeight: tilesetConfig.tileSize
+        });
+
+        // Get collectibles sprite config from level data, with defaults
+        const collectConfig = this.levelData.collectiblesSprite || {
+            path: './assets/sprites/collectibles.png',
+            cols: 3,
+            rows: 1,
+            frameSize: 64
+        };
+
+        this.collectCols = collectConfig.cols;
+        this.collectFrameSize = collectConfig.frameSize;
+
+        this.load.spritesheet('collectibles', collectConfig.path, {
+            frameWidth: collectConfig.frameSize,
+            frameHeight: collectConfig.frameSize
+        });
+        this.load.image('robot', './assets/sprites/robot.png');
+
+        // Start loading and call setup when done
+        this.load.once('complete', () => this.setupLevel());
+        this.load.start();
+    }
+
+    setupLevel() {
         this.tileSize = 48;
         this.collectibles = [];
 
-        // Calculate world size
+        // Build blocked map for quick lookup
+        this.blockedMap = new Set();
+        if (this.levelData.blocked) {
+            this.levelData.blocked.forEach(b => {
+                this.blockedMap.add(`${b.x},${b.y}`);
+            });
+        }
+
         const worldWidth = this.levelData.gridWidth * this.tileSize;
         const worldHeight = this.levelData.gridHeight * this.tileSize;
 
-        // Set world bounds
         this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
+        this.cameras.main.setBackgroundColor('#1a1a2e');
 
         // Draw Tiles
         this.drawTilemap();
+
+        // Draw Goal if exists
+        if (this.levelData.goalPosition) {
+            const gx = this.levelData.goalPosition.x * this.tileSize + this.tileSize / 2;
+            const gy = this.levelData.goalPosition.y * this.tileSize + this.tileSize / 2;
+            this.goal = this.add.text(gx, gy, '🏁', { fontSize: '32px' }).setOrigin(0.5).setDepth(40);
+        }
 
         // Spawn Collectibles
         this.spawnCollectibles();
@@ -54,25 +99,21 @@ class LevelScene extends Phaser.Scene {
         const start = this.levelData.robotStart;
         this.robot = new Robot(this, start.x, start.y, start.direction);
 
-        // Make Robot Interactive
         this.robot.sprite.setInteractive();
         this.robot.sprite.on('pointerdown', () => {
             this.attempts++;
-            // Call UIScene directly instead of events
             const uiScene = this.scene.get('UIScene');
             if (uiScene && uiScene.openCamera) {
                 uiScene.openCamera();
             }
         });
 
-        // Setup Camera to follow Robot
+        // Camera
         this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
         this.cameras.main.startFollow(this.robot.sprite, true, 0.1, 0.1);
 
-        // Start UIScene and update it
+        // UI
         this.scene.launch('UIScene');
-
-        // Wait a frame then update UI
         this.time.delayedCall(100, () => {
             const uiScene = this.scene.get('UIScene');
             if (uiScene && uiScene.updateLevelInfo) {
@@ -80,15 +121,12 @@ class LevelScene extends Phaser.Scene {
             }
         });
 
-        // Start Timer
         this.startTime = Date.now();
     }
 
     update() {
         if (this.startTime) {
             const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-
-            // Direct call to UIScene
             const uiScene = this.scene.get('UIScene');
             if (uiScene && uiScene.updateHUD) {
                 uiScene.updateHUD(elapsed, this.attempts, this.collected, this.levelData.collectibles.length);
@@ -98,37 +136,48 @@ class LevelScene extends Phaser.Scene {
 
     drawTilemap() {
         const tiles = this.levelData.tiles;
+        const decorations = this.levelData.decorations;
 
-        const tileFrameMap = {
-            0: [0, 1, 2, 10],
-            1: [40, 41, 42, 44],
-            2: [54, 55],
-            3: [25, 26, 35, 36]
-        };
-
+        // Draw base layer
         for (let y = 0; y < tiles.length; y++) {
             for (let x = 0; x < tiles[y].length; x++) {
-                const tileType = tiles[y][x];
+                const frame = tiles[y][x];
                 const posX = x * this.tileSize + this.tileSize / 2;
                 const posY = y * this.tileSize + this.tileSize / 2;
-
-                const variants = tileFrameMap[tileType] || [0];
-                const frame = variants[Math.floor(Math.random() * variants.length)];
 
                 const tile = this.add.image(posX, posY, 'tileset', frame);
                 tile.setDisplaySize(this.tileSize, this.tileSize);
             }
         }
+
+        // Draw decoration layer (on top of base)
+        if (decorations) {
+            for (let y = 0; y < decorations.length; y++) {
+                for (let x = 0; x < decorations[y].length; x++) {
+                    const frame = decorations[y][x];
+                    if (frame !== null && frame !== undefined) {
+                        const posX = x * this.tileSize + this.tileSize / 2;
+                        const posY = y * this.tileSize + this.tileSize / 2;
+
+                        const decor = this.add.image(posX, posY, 'tileset', frame);
+                        decor.setDisplaySize(this.tileSize, this.tileSize);
+                        decor.setDepth(10); // Above base tiles
+                    }
+                }
+            }
+        }
     }
 
     spawnCollectibles() {
+        // Legacy type to frame mapping for backwards compatibility
         const frameMap = { 'tire': 0, 'bottle': 1, 'bag': 2 };
 
         this.levelData.collectibles.forEach(item => {
             const x = item.x * this.tileSize + this.tileSize / 2;
             const y = item.y * this.tileSize + this.tileSize / 2;
 
-            const frame = frameMap[item.type] ?? 0;
+            // Use frame directly if available, otherwise fallback to type mapping
+            const frame = item.frame ?? (frameMap[item.type] ?? 0);
             const sprite = this.add.image(x, y, 'collectibles', frame);
             sprite.setDisplaySize(36, 36);
             sprite.setDepth(50);
@@ -155,8 +204,13 @@ class LevelScene extends Phaser.Scene {
         if (gridY < 0 || gridY >= tiles.length || gridX < 0 || gridX >= tiles[0].length) {
             return false;
         }
-        const tile = tiles[gridY][gridX];
-        return tile !== 2 && tile !== 3;
+
+        // Check blocked map
+        if (this.blockedMap.has(`${gridX},${gridY}`)) {
+            return false;
+        }
+
+        return true;
     }
 
     collectAtPosition(gridX, gridY) {
@@ -174,26 +228,48 @@ class LevelScene extends Phaser.Scene {
                 onComplete: () => item.setVisible(false)
             });
 
-            if (this.collected === this.levelData.collectibles.length) {
-                this.time.delayedCall(500, () => this.levelComplete());
-            }
+            // Check victory condition
+            this.checkVictory();
+        }
+    }
+
+    checkVictory() {
+        const condition = this.levelData.victoryCondition || 'collectAll';
+        const allCollected = this.collected === this.levelData.collectibles.length;
+        const atGoal = this.levelData.goalPosition &&
+            this.robot.gridX === this.levelData.goalPosition.x &&
+            this.robot.gridY === this.levelData.goalPosition.y;
+
+        let won = false;
+
+        switch (condition) {
+            case 'collectAll':
+                won = allCollected;
+                break;
+            case 'reachGoal':
+                won = atGoal;
+                break;
+            case 'both':
+                won = allCollected && atGoal;
+                break;
+        }
+
+        if (won) {
+            this.time.delayedCall(500, () => this.levelComplete());
         }
     }
 
     async executeCommands(commands) {
-        commands = commands.filter(c => c !== 'inicio');
         await Interpreter.execute(commands, this.robot, this);
 
-        if (this.collected === this.levelData.collectibles.length) {
-            this.levelComplete();
-        }
+        // Check victory after execution
+        this.checkVictory();
     }
 
     levelComplete() {
         const timeUsed = Math.floor((Date.now() - this.startTime) / 1000);
         const stars = this.calculateStars(timeUsed, this.attempts);
 
-        // Stop UIScene before transition
         this.scene.stop('UIScene');
 
         this.scene.start('LevelCompleteScene', {

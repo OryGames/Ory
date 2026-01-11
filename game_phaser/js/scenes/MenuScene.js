@@ -30,7 +30,8 @@ class MenuScene extends Phaser.Scene {
         const levels = [
             { id: 1, name: 'Quintal da Casa', stars: this.getStars(1) },
             { id: 2, name: 'Rua do Bairro', stars: this.getStars(2) },
-            { id: 3, name: 'Parque Municipal', stars: this.getStars(3) }
+            { id: 3, name: 'Parque Municipal', stars: this.getStars(3) },
+            { id: 4, name: 'test', stars: this.getStars(3) }
         ];
 
         levels.forEach((level, i) => {
