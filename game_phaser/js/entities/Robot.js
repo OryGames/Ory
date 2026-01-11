@@ -1,46 +1,46 @@
 class Robot {
-    constructor(scene, gridX, gridY) {
+    constructor(scene, gridX, gridY, direction = 1) {
         this.scene = scene;
         this.gridX = gridX;
         this.gridY = gridY;
-        this.tileSize = 64;
+        this.tileSize = scene.tileSize || 48;
+        this.direction = direction;
+        this.isMoving = false;
 
-        // Current Heading (0: Up, 1: Right, 2: Down, 3: Left)
-        this.direction = 1; // Start facing Right
-
-        // Visuals
         const screenX = this.gridX * this.tileSize + this.tileSize / 2;
         const screenY = this.gridY * this.tileSize + this.tileSize / 2;
 
-        // Body
-        this.sprite = scene.add.container(screenX, screenY);
+        // Create sprite from loaded image
+        this.sprite = scene.add.image(screenX, screenY, 'robot');
+        this.sprite.setDisplaySize(42, 42);
+        this.sprite.setDepth(100);
 
-        const body = scene.add.rectangle(0, 0, 48, 48, 0x00d4bb);
-        const eye = scene.add.rectangle(10, -10, 10, 10, 0x000000); // Visual indicator for "Forward"
+        // Apply initial rotation
+        this.updateRotation(false);
 
-        this.sprite.add([body, eye]);
-        this.sprite.setSize(48, 48);
+        // Make interactive
+        this.sprite.setInteractive({ useHandCursor: true });
+    }
 
-        // Ensure sprite faces correct initial direction (Right)
-        // 0=Up, 1=Right(90), 2=Down(180), 3=Left(270)
-        this.sprite.angle = 90;
+    updateRotation(animate = true) {
+        const angles = [-90, 0, 90, 180];
+        const targetAngle = angles[this.direction];
 
-        // Interactive for clicking
-        this.sprite.setInteractive(new Phaser.Geom.Rectangle(-24, -24, 48, 48), Phaser.Geom.Rectangle.Contains);
+        if (animate) {
+            this.scene.tweens.add({
+                targets: this.sprite,
+                angle: targetAngle,
+                duration: 200,
+                ease: 'Sine.easeInOut'
+            });
+        } else {
+            this.sprite.angle = targetAngle;
+        }
     }
 
     face(direction) {
         this.direction = direction;
         this.updateRotation();
-    }
-
-    updateRotation() {
-        const angles = [0, 90, 180, -90];
-        this.scene.tweens.add({
-            targets: this.sprite,
-            angle: angles[this.direction],
-            duration: 200
-        });
     }
 
     turnRight() {
@@ -53,34 +53,92 @@ class Robot {
         this.updateRotation();
     }
 
-    moveForward(steps = 1) {
-        // Calculate target grid position
-        let dx = 0;
-        let dy = 0;
+    async moveForward(steps = 1) {
+        if (this.isMoving) return;
+        this.isMoving = true;
 
-        if (this.direction === 0) dy = -1;
-        if (this.direction === 1) dx = 1;
-        if (this.direction === 2) dy = 1;
-        if (this.direction === 3) dx = -1;
+        const dx = [0, 1, 0, -1];
+        const dy = [-1, 0, 1, 0];
 
-        const targetX = this.gridX + (dx * steps);
-        const targetY = this.gridY + (dy * steps);
+        for (let i = 0; i < steps; i++) {
+            const nextX = this.gridX + dx[this.direction];
+            const nextY = this.gridY + dy[this.direction];
 
-        // Update Grid Coords
+            if (!this.scene.checkCollision(nextX, nextY)) {
+                console.log("Blocked at", nextX, nextY);
+                break;
+            }
+
+            this.gridX = nextX;
+            this.gridY = nextY;
+
+            const screenX = this.gridX * this.tileSize + this.tileSize / 2;
+            const screenY = this.gridY * this.tileSize + this.tileSize / 2;
+
+            await new Promise(resolve => {
+                this.scene.tweens.add({
+                    targets: this.sprite,
+                    x: screenX,
+                    y: screenY,
+                    duration: 250,
+                    ease: 'Sine.easeInOut',
+                    onComplete: resolve
+                });
+            });
+
+            this.scene.collectAtPosition(this.gridX, this.gridY);
+        }
+
+        this.isMoving = false;
+    }
+
+    async jump(steps = 1) {
+        if (this.isMoving) return;
+        this.isMoving = true;
+
+        const dx = [0, 1, 0, -1];
+        const dy = [-1, 0, 1, 0];
+
+        const targetX = this.gridX + dx[this.direction] * (steps + 1);
+        const targetY = this.gridY + dy[this.direction] * (steps + 1);
+
+        if (!this.scene.checkCollision(targetX, targetY)) {
+            console.log("Cannot land at", targetX, targetY);
+            this.isMoving = false;
+            return;
+        }
+
         this.gridX = targetX;
         this.gridY = targetY;
 
         const screenX = this.gridX * this.tileSize + this.tileSize / 2;
         const screenY = this.gridY * this.tileSize + this.tileSize / 2;
 
-        return new Promise(resolve => {
+        await new Promise(resolve => {
             this.scene.tweens.add({
                 targets: this.sprite,
-                x: screenX,
-                y: screenY,
-                duration: 500 * steps,
-                onComplete: resolve
+                y: this.sprite.y - 30,
+                scaleX: 1.15,
+                scaleY: 0.85,
+                duration: 120,
+                yoyo: false,
+                ease: 'Sine.easeOut',
+                onComplete: () => {
+                    this.scene.tweens.add({
+                        targets: this.sprite,
+                        x: screenX,
+                        y: screenY,
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 200,
+                        ease: 'Sine.easeIn',
+                        onComplete: resolve
+                    });
+                }
             });
         });
+
+        this.scene.collectAtPosition(this.gridX, this.gridY);
+        this.isMoving = false;
     }
 }

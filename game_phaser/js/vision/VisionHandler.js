@@ -9,7 +9,7 @@ class VisionHandler {
         };
 
         this.isDetecting = false;
-        this.detectedBlocks = []; // Last valid detected frame
+        this.detectedBlocks = [];
 
         this.CLASSES = [
             'andar', 'circulo', 'inicio', 'looping', 'pegar', 'pular', 'triangulo', 'zzz',
@@ -23,20 +23,25 @@ class VisionHandler {
     async loadModel() {
         try {
             console.log("Vision: Loading YOLO...");
-            this.videoElements.status.innerText = "Loading AI Model...";
+            if (this.videoElements.status) {
+                this.videoElements.status.innerText = "Carregando IA...";
+            }
             this.model = await tf.loadGraphModel('./assets/model/model.json');
 
-            // Warmup
             const zeroTensor = tf.zeros([1, 640, 640, 3], 'float32');
             const result = await this.model.execute(zeroTensor);
             tf.dispose(result);
             tf.dispose(zeroTensor);
 
             console.log("Vision: Model Ready");
-            this.videoElements.status.innerText = "Model Ready. Align blocks!";
+            if (this.videoElements.status) {
+                this.videoElements.status.innerText = "IA pronta! Alinhe os blocos.";
+            }
         } catch (e) {
             console.error(e);
-            this.videoElements.status.innerText = "Error loading model.";
+            if (this.videoElements.status) {
+                this.videoElements.status.innerText = "Erro ao carregar modelo.";
+            }
         }
     }
 
@@ -71,7 +76,6 @@ class VisionHandler {
     async detectLoop() {
         if (!this.isDetecting || !this.model) return;
 
-        // 1. Preprocess
         const tfImg = tf.tidy(() => {
             const cam = tf.browser.fromPixels(this.videoElements.video);
             const resized = tf.image.resizeBilinear(cam, [640, 640]);
@@ -79,30 +83,24 @@ class VisionHandler {
             return normalized;
         });
 
-        // 2. Predict
         try {
             const res = await this.model.execute(tfImg);
-            const prediction = res.squeeze(); // [4+nc, anchors] or [anchors, 4+nc]
-
-            // Should be [output_channels, anchors] -> usually [24, 8400] for nc=20
-            const transposed = prediction.transpose([1, 0]); // [8400, 24]
+            const prediction = res.squeeze();
+            const transposed = prediction.transpose([1, 0]);
             const data = await transposed.data();
 
             tf.dispose([res, prediction, transposed]);
 
             const boxes = this.processResults(data);
-
-            // Store detected blocks (sorted by Y for execution order)
-            // Filter out low confidence
             this.detectedBlocks = boxes;
 
-            // Update UI status?
-            if (boxes.length > 0) {
-                this.videoElements.status.innerText = `Detected ${boxes.length} blocks`;
-            } else {
-                this.videoElements.status.innerText = "No blocks detected...";
+            if (this.videoElements.status) {
+                if (boxes.length > 0) {
+                    this.videoElements.status.innerText = `Detectados: ${boxes.length} blocos`;
+                } else {
+                    this.videoElements.status.innerText = "Nenhum bloco detectado...";
+                }
             }
-
         } catch (e) {
             console.error(e);
         }
@@ -115,38 +113,30 @@ class VisionHandler {
     }
 
     processResults(data) {
-        // Parse YOLO output
-        const num_anchors = 8400; // Standard v8n
+        const num_anchors = 8400;
         const nc = 20;
         const dims = nc + 4;
 
         let rawBoxes = [];
-        let rawScores = [];
-        let rawClasses = [];
 
         for (let i = 0; i < num_anchors; i++) {
-            const update = data.slice(i * dims, (i + 1) * dims);
+            const offset = i * dims;
 
-            // Find max score
             let maxScore = 0;
             let maxClass = -1;
             for (let c = 0; c < nc; c++) {
-                const s = update[4 + c];
+                const s = data[offset + 4 + c];
                 if (s > maxScore) {
                     maxScore = s;
                     maxClass = c;
                 }
             }
 
-            if (maxScore > 0.4) { // Threshold
-                const xc = update[0];
-                const yc = update[1];
-                const w = update[2];
-                const h = update[3];
-
-                // Box format [y1, x1, y2, x2] for TFJS NMS? No, NMS takes [y1, x1, y2, x2] usually
-                // But generally simpler to do JS NMS or manual NMS if Tensor based is annoying.
-                // Let's use simple manual checking here for simplicity relying on high confidence
+            if (maxScore > 0.4) {
+                const xc = data[offset + 0];
+                const yc = data[offset + 1];
+                const w = data[offset + 2];
+                const h = data[offset + 3];
 
                 rawBoxes.push({
                     x: xc,
@@ -160,29 +150,15 @@ class VisionHandler {
             }
         }
 
-        // Simple NMS (Greedy)
+        // Simple NMS
         rawBoxes.sort((a, b) => b.score - a.score);
         const finalBoxes = [];
 
         while (rawBoxes.length > 0) {
             const current = rawBoxes.shift();
             finalBoxes.push(current);
-
-            rawBoxes = rawBoxes.filter(b => {
-                // Calc IoU
-                return this.iou(current, b) < 0.45;
-            });
+            rawBoxes = rawBoxes.filter(b => this.iou(current, b) < 0.45);
         }
-
-        // Sort final boxes top-to-bottom (Y) then left-to-right (X)
-        // Primary sort Y (with some tolerance), Secondary X
-        finalBoxes.sort((a, b) => {
-            const dy = Math.abs(a.y - b.y);
-            if (dy > 30) { // If Y diff is significant, use Y
-                return a.y - b.y;
-            }
-            return a.x - b.x; // Else Sort X line-by-lineish
-        });
 
         return finalBoxes;
     }
@@ -203,8 +179,46 @@ class VisionHandler {
     }
 
     capture() {
-        // Return current detected blocks
         this.stopCamera();
-        return this.detectedBlocks.map(b => b.label);
+
+        // Group blocks by line (similar Y coordinate)
+        // Then sort each line by X (left to right)
+        const boxes = [...this.detectedBlocks];
+
+        // Sort by Y first
+        boxes.sort((a, b) => a.y - b.y);
+
+        // Group into lines (blocks within 40px vertically are same line)
+        const lines = [];
+        let currentLine = [];
+        let lastY = -1000;
+
+        for (const box of boxes) {
+            if (Math.abs(box.y - lastY) > 40) {
+                // New line
+                if (currentLine.length > 0) {
+                    lines.push(currentLine);
+                }
+                currentLine = [box];
+                lastY = box.y;
+            } else {
+                currentLine.push(box);
+            }
+        }
+        if (currentLine.length > 0) {
+            lines.push(currentLine);
+        }
+
+        // Sort each line by X (left to right)
+        lines.forEach(line => line.sort((a, b) => a.x - b.x));
+
+        // Convert to command structure
+        // Each line = one command object with all its parts
+        const commands = lines.map(line => {
+            return line.map(b => b.label);
+        });
+
+        console.log("Parsed Commands (by line):", commands);
+        return commands;
     }
 }

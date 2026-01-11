@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ory: Robot Coding Adventure</title>
+    <title>Ory: Caça Dengue 🦟</title>
     <link rel="stylesheet" href="css/style.css">
 
     <!-- Libraries -->
@@ -12,21 +12,31 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: #2d2d2d;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a3a2f 0%, #0d1f1a 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: white;
+            min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
         }
 
         #game-container {
             position: relative;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 212, 187, 0.3), 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #game-container canvas {
+            display: block;
         }
     </style>
 </head>
@@ -35,27 +45,30 @@
 
     <div id="game-container"></div>
 
-    <!-- UI Overlay for Camera (Hidden by default, managed by Phaser/CSS) -->
+    <!-- Camera Overlay (Managed by CSS/JS) -->
     <div id="camera-overlay" class="hidden">
         <div class="camera-box">
-            <h2>Scan Your Code</h2>
+            <h2>📷 Escanear Código</h2>
+            <p class="subtitle">Mostre os blocos para a câmera</p>
             <div class="video-wrapper">
                 <video id="webcam" autoplay playsinline muted></video>
                 <div id="scan-line"></div>
             </div>
             <div class="controls">
-                <button id="btn-capture">Capture Code</button>
-                <button id="btn-close">Close</button>
+                <button id="btn-capture">✅ Capturar</button>
+                <button id="btn-close">❌ Fechar</button>
             </div>
-            <div id="status-text">Waiting for camera...</div>
+            <div id="status-text">Carregando modelo de IA...</div>
         </div>
     </div>
 
-    <!-- Game Scripts -->
+    <!-- Game Scripts (Order matters!) -->
     <script src="js/vision/VisionHandler.js"></script>
     <script src="js/logic/Interpreter.js"></script>
     <script src="js/entities/Robot.js"></script>
+    <script src="js/scenes/MenuScene.js"></script>
     <script src="js/scenes/LevelScene.js"></script>
+    <script src="js/scenes/LevelCompleteScene.js"></script>
     <script src="js/scenes/UIScene.js"></script>
     <script src="js/game.js"></script>
 

@@ -1,28 +1,27 @@
 /**
- * Ory: Robot Coding Adventure
+ * Ory: Caça Dengue - Robot Coding Adventure
  * Main Game Configuration
  */
 
 const config = {
     type: Phaser.AUTO,
-    width: 1024,
-    height: 768,
-    parent: 'game-container', // Attach to div
+    width: 800,
+    height: 640,
+    parent: 'game-container',
     backgroundColor: '#1a1a1a',
-    pixelArt: false, // Ensure smooth scaling for vector-like assets if any
+    pixelArt: true,
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 }, // Top-down
+            gravity: { y: 0 },
             debug: false
         }
     },
-    scene: [LevelScene, UIScene] // We will define these classes next
+    scene: [MenuScene, LevelScene, LevelCompleteScene, UIScene]
 };
 
-// Initialize Game (after window load to be safe)
+// Initialize Game
 window.onload = () => {
-    // Check if other scripts loaded (VisionHandler, etc)
-    console.log("Starting Ory Game...");
+    console.log("🦟 Starting Ory: Caça Dengue...");
     const game = new Phaser.Game(config);
 };
