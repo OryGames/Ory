@@ -349,4 +349,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 deeplearning/dataset_generator/venv
-deeplearning/dataset_generator/
+deeplearning/yolo_model/data/obj/**
