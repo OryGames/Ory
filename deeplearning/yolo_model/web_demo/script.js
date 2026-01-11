@@ -1,236 +1,205 @@
+// 20 classes defined in obj.names
+const CLASSES = [
+    'andar', 'circulo', 'inicio', 'looping', 'pegar', 'pular', 'triangulo', 'zzz',
+    '2', '3', '4', '5', '6', '7', '8', '9',
+    'seta_up', 'seta_down', 'seta_left', 'seta_right'
+];
+
+const colors = [
+    '#FF3838', '#FF9D97', '#FF701F', '#FFB21D', '#CFD231', '#48F90A', '#92CC17', '#3DDB86',
+    '#1A9334', '#00D4BB', '#2C99A8', '#00C2FF', '#344593', '#6473FF', '#0018EC', '#8438FF',
+    '#520085', '#CB38FF', '#FF95C8', '#FF37C7'
+];
+
+let model;
 const video = document.getElementById('webcam');
 const canvas = document.getElementById('output');
 const ctx = canvas.getContext('2d');
-const loadModelBtn = document.getElementById('loadModelBtn');
-const startCamBtn = document.getElementById('startCamBtn');
-const statusElem = document.getElementById('status');
+const loadButton = document.getElementById('loadModelBtn');
+const startButton = document.getElementById('startCamBtn');
 
-let model;
-let digitModel;
-let classNames = [];
-let digitClasses = ['2', '3', '4', '5', '6', '7', '8', '9']; // Default, will verify against classes.json if needed
-
-// Load class names from obj.names (hardcoded for now or fetch)
-// Based on previous tool output:
-const CLASSES = ['numero', 'andar', 'circulo', 'inicio', 'looping', 'pegar', 'pular', 'seta', 'triangulo', 'zzz'];
-
-loadModelBtn.addEventListener('click', async () => {
+async function loadModel() {
     try {
-        statusElem.innerText = 'Status: Loading models...';
-        // Load the model from the local file system (served via http-server)
-        // Adjust path if needed. 
-        model = await tf.loadGraphModel('model_output/model.json');
-
-        // Load Digit Classifier
-        try {
-            digitModel = await tf.loadLayersModel('digit_model_js/model.json');
-            console.log("Digit model loaded");
-        } catch (e) {
-            console.warn("Failed to load digit model", e);
-        }
-
-        statusElem.innerText = 'Status: Models loaded! Ready to start webcam.';
-        loadModelBtn.disabled = true;
-        startCamBtn.disabled = false;
+        console.log("Loading YOLO model...");
+        // Load the model from the local server
+        model = await tf.loadGraphModel('./model_output/model.json');
+        console.log("Model loaded successfully");
 
         // Warmup
         const dummyInput = tf.zeros([1, 640, 640, 3]);
         model.execute(dummyInput);
-        tf.dispose(dummyInput);
 
-        if (digitModel) {
-            const dummyDigit = tf.zeros([1, 64, 64, 3]);
-            digitModel.predict(dummyDigit);
-            tf.dispose(dummyDigit);
-        }
+        loadButton.disabled = true;
+        loadButton.textContent = "Model Loaded";
+        startButton.disabled = false;
 
-    } catch (e) {
-        console.error(e);
-        statusElem.innerText = 'Status: Error loading model. Check console.';
+    } catch (err) {
+        console.error("Failed to load model:", err);
+        alert("Failed to load model. Make sure python http.server is running in this folder!");
     }
-});
+}
 
-startCamBtn.addEventListener('click', async () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width: { ideal: 640 },
-                    height: { ideal: 640 }
-                }
-            });
-            video.srcObject = stream;
-
-            video.onloadedmetadata = () => {
-                detectFrame();
-            };
-
-            startCamBtn.disabled = true;
-            statusElem.innerText = 'Status: API Running';
-        } catch (e) {
-            console.error(e);
-            statusElem.innerText = 'Status: Error accessing webcam.';
+async function setupWebcam() {
+    return new Promise((resolve, reject) => {
+        const navigatorAny = navigator;
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia ||
+            navigatorAny.msGetUserMedia;
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia({ video: true },
+                stream => {
+                    video.srcObject = stream;
+                    video.addEventListener('loadeddata', () => resolve(), false);
+                },
+                error => reject());
+        } else {
+            reject();
         }
-    }
-});
+    });
+}
+
+function preprocess(video) {
+    return tf.tidy(() => {
+        // Explicitly create a tensor from the video element
+        const cam = tf.browser.fromPixels(video);
+
+        // Resize to 640x640
+        const resized = tf.image.resizeBilinear(cam, [640, 640]);
+
+        // Normalize: (x / 255.0)  -> This depends on how the model was trained!
+        // YOLOv8 usually expects 0-1 float32
+        const normalized = resized.div(tf.scalar(255.0));
+
+        // Add batch dimension: [1, 640, 640, 3]
+        const batched = normalized.expandDims(0);
+        return batched;
+    });
+}
 
 async function detectFrame() {
     if (!model) return;
 
-    // 1. Preprocess
-    const tfImg = tf.browser.fromPixels(video);
-    const info = {
-        width: video.videoWidth,
-        height: video.videoHeight
-    };
+    // Preprocess video frame
+    const batched = preprocess(video);
 
-    // Resize to 640x640, normalize to [0,1]
-    const resized = tf.image.resizeBilinear(tfImg, [640, 640]);
-    const normalized = resized.div(255.0);
-    const batched = normalized.expandDims(0); // [1, 640, 640, 3]
+    try {
+        // Run inference
+        const res = model.execute(batched);
+        // res is usually a tensor [1, 4+num_classes, 8400] for YOLOv8
+        // or [1, 8400, 4+num_classes] depending on export.
 
-    // 2. Inference
-    const res = model.execute(batched);
+        // Let's assume standard output shape [1, 8400, 4+nc]?
+        // Ultralytics JS export usually matches regular export which is [1, 4+nc, 8400]
 
-    // Output shape for YOLOv8n: [1, 4 + nc, 8400] -> [1, 14, 8400]
-    // 0-3: cx, cy, w, h
-    // 4-13: class probs
+        const output = res.squeeze(); // [4+nc, 8400]
 
-    const output = res.squeeze(); // [14, 8400]
-    const trans = output.transpose([1, 0]); // [8400, 14]
+        const num_channels = output.shape[0];
+        const num_anchors = output.shape[1];
 
-    const boxes = [];
-    const scores = [];
-    const classIndices = [];
+        // We transpose to [8400, 24] for easier iteration
+        const transposed = output.transpose([1, 0]);
+        const data = await transposed.data();
 
-    // Extract data
-    const data = await trans.data();
+        // Clean up tensors
+        batched.dispose();
+        res.dispose();
+        output.dispose();
+        transposed.dispose();
 
-    const numAnchors = 8400;
-    const numClasses = CLASSES.length;
-    const stride = 4 + numClasses;
+        // Non-Maximum Suppression (NMS)
+        const boxes = [];
+        const scores = [];
+        const classes = [];
 
-    for (let i = 0; i < numAnchors; i++) {
-        const row = i * stride;
+        const threshold = 0.25; // Confidence threshold
 
-        // Find max class score
-        let maxScore = -Infinity;
-        let maxClass = -1;
+        for (let i = 0; i < num_anchors; i++) {
+            const offset = i * num_channels;
 
-        for (let c = 0; c < numClasses; c++) {
-            const score = data[row + 4 + c];
-            if (score > maxScore) {
-                maxScore = score;
-                maxClass = c;
+            // Find max class score
+            let maxScore = 0;
+            let maxClass = -1;
+
+            // Loop over 20 classes
+            for (let c = 0; c < 20; c++) {
+                const s = data[offset + 4 + c];
+                if (s > maxScore) {
+                    maxScore = s;
+                    maxClass = c;
+                }
+            }
+
+            if (maxScore > threshold) {
+                const xc = data[offset + 0];
+                const yc = data[offset + 1];
+                const w = data[offset + 2];
+                const h = data[offset + 3];
+
+                // Convert center-wh to top-left-xy
+                const x = (xc - w / 2) * (canvas.width / 640);
+                const y = (yc - h / 2) * (canvas.height / 640);
+                const width = w * (canvas.width / 640);
+                const height = h * (canvas.height / 640);
+
+                boxes.push([x, y, width, height]);
+                scores.push(maxScore);
+                classes.push(maxClass);
             }
         }
 
-        if (maxScore > 0.4) { // Confidence threshold
-            const cx = data[row];
-            const cy = data[row + 1];
-            const w = data[row + 2];
-            const h = data[row + 3];
+        // Draw
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            boxes.push([
-                cx - w / 2, // x1
-                cy - h / 2, // y1
-                w,          // width
-                h           // height
-            ]);
-            scores.push(maxScore);
-            classIndices.push(maxClass);
-        }
-    }
+        // Use TF.js NMS
+        if (boxes.length > 0) {
+            const nmsIndices = await tf.image.nonMaxSuppressionAsync(
+                tf.tensor2d(boxes, [boxes.length, 4]),
+                tf.tensor1d(scores),
+                20, // max output size
+                0.45, // iou threshold
+                0.25 // score threshold
+            );
 
-    // 3. NMS
-    if (boxes.length === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas if no boxes
-        tf.dispose([tfImg, resized, normalized, batched, res, output, trans]);
-        requestAnimationFrame(detectFrame);
-        return;
-    }
+            const indices = await nmsIndices.data();
+            nmsIndices.dispose();
 
-    const nmsIndices = await tf.image.nonMaxSuppressionAsync(
-        tf.tensor2d(boxes, [boxes.length, 4]),
-        tf.tensor1d(scores),
-        20, // max output size
-        0.45, // iou threshold
-        0.4 // score threshold
-    );
+            ctx.font = '18px Arial';
+            ctx.lineWidth = 2;
 
-    const indices = await nmsIndices.data();
+            for (let i = 0; i < indices.length; i++) {
+                const idx = indices[i];
+                const box = boxes[idx];
+                const classId = classes[idx];
+                const score = scores[idx];
+                const label = CLASSES[classId]; // Directly use the label
 
-    // 4. Draw & Secondary Classification
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const color = colors[classId % colors.length];
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
 
-    // Scale factors
-    const scaleX = canvas.width / 640;
-    const scaleY = canvas.height / 640;
-    // Assuming video is also 640x640 roughly. If not, need more complex scaling.
-    // For demo output matching input tensor size:
+                ctx.beginPath();
+                ctx.rect(box[0], box[1], box[2], box[3]);
+                ctx.stroke();
 
-    ctx.font = '16px sans-serif';
-    ctx.lineWidth = 2;
-
-    for (let i = 0; i < indices.length; i++) {
-        const idx = indices[i];
-        const box = boxes[idx];
-        const score = scores[idx];
-        const cls = classIndices[idx];
-
-        let label = CLASSES[cls];
-
-        // Classification logic for "numero"
-        if (label === 'numero' && digitModel) {
-            // Crop from original normalized image (640x640)
-            // Box format in 'boxes' array is [x1, y1, w, h] in 640 pixel coords
-            const x1 = Math.max(0, box[0]);
-            const y1 = Math.max(0, box[1]);
-            const width = box[2];
-            const height = box[3];
-
-            if (width > 0 && height > 0) {
-                const crop = tf.image.cropAndResize(
-                    batched,
-                    [[y1 / 640, x1 / 640, (y1 + height) / 640, (x1 + width) / 640]],
-                    [0],
-                    [64, 64]
-                );
-
-                const digitPred = digitModel.predict(crop);
-                const digitScore = await digitPred.data();
-                const maxVal = Math.max(...digitScore);
-                const digitIdx = digitScore.indexOf(maxVal);
-
-                label = `Num: ${digitClasses[digitIdx]}`;
-
-                tf.dispose([crop, digitPred]);
+                ctx.fillStyle = color;
+                ctx.fillText(`${label} (${(score * 100).toFixed(1)}%)`, box[0], box[1] > 20 ? box[1] - 5 : box[1] + 15);
             }
         }
 
-        const x = box[0] * scaleX;
-        const y = box[1] * scaleY;
-        const w = box[2] * scaleX;
-        const h = box[3] * scaleY;
-
-        // Color based on class (simple hash)
-        const color = `hsl(${cls * 360 / numClasses}, 100%, 50%)`;
-
-        ctx.strokeStyle = color;
-        ctx.strokeRect(x, y, w, h);
-
-        ctx.fillStyle = color;
-        const text = `${label} ${(score * 100).toFixed(1)}%`;
-        const textWidth = ctx.measureText(text).width;
-        ctx.fillRect(x, y - 20, textWidth + 4, 20);
-
-        ctx.fillStyle = 'white';
-        ctx.fillText(text, x + 2, y - 5);
+    } catch (e) {
+        console.error(e);
     }
-
-    // Cleanup tensors
-    tf.dispose([tfImg, resized, normalized, batched, res, output, trans, nmsIndices]);
 
     requestAnimationFrame(detectFrame);
 }
+
+loadButton.addEventListener('click', loadModel);
+startButton.addEventListener('click', () => {
+    setupWebcam().then(() => {
+        detectFrame();
+        startButton.disabled = true;
+    }).catch(err => {
+        console.error(err);
+        alert("Failed to start webcam. Please allow access.");
+    });
+});

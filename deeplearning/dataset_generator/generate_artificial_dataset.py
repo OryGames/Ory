@@ -141,18 +141,21 @@ def generate_img_blocks(blocks,backGroundImageFile,OutputImageFile,OutputYoloFil
     
     blck_perc=550/width
     
-    dicObj={}
-    dicObj['numero']=0
-    dicObj['andar']=1
-    dicObj['circulo']=2
-    dicObj['inicio']=3
-    dicObj['looping']=4
-    dicObj['pegar']=5
-    dicObj['pular']=6
-    dicObj['seta']=7
-    dicObj['triangulo']=8
-    dicObj['zzz']=9
-
+    # Define granular classes
+    class_list = [
+        'andar', 'circulo', 'inicio', 'looping', 'pegar', 'pular', 'triangulo', 'zzz',
+        '2', '3', '4', '5', '6', '7', '8', '9',
+        'seta_up', 'seta_down', 'seta_left', 'seta_right'
+    ]
+    dicObj = {name: i for i, name in enumerate(class_list)}
+    
+    # Write obj.names if it doesn't exist or is different (Helper to ensure consistency)
+    # We write it to the output directory so data_utils can find it
+    names_file_path = os.path.join(os.path.dirname(OutputYoloFile), 'obj.names')
+    # If we haven't written it in this run yet (or strictly checking), just overwrite for safety
+    # But this function is called per image. Let's do it once in main or check existence.
+    # For now, just rely on prints or do it in main.
+    
     # Store objects to annotate: {'class_id': int, 'rect': [x, y, w, h]}
     # We will process/draw them all first on the transparent layer
     objects_to_transform = [] 
@@ -179,10 +182,17 @@ def generate_img_blocks(blocks,backGroundImageFile,OutputImageFile,OutputYoloFil
         blckInicio=blckInicio.resize((newwidth,newheight),Image.LANCZOS)
         blocks_layer.paste(blckInicio, (b['x'],b['y']), mask=blckInicio)
         
-        objects_to_transform.append({
-            'class': dicObj[b['name']],
-            'rect': (b['x'], b['y'], newwidth, newheight)
-        })
+        # Map generic names to specific classes if needed, or assume b['name'] is in dict
+        # The text files have 'andar', 'pegar' etc which are in our list.
+        # But 'numero' is not. 'numero' comes from 'steps'.
+        if b['name'] in dicObj:
+             objects_to_transform.append({
+                'class': dicObj[b['name']],
+                'rect': (b['x'], b['y'], newwidth, newheight)
+            })
+        else:
+             # If it's not in dict (like if simple blocks provided numbers as names?), ignore or handle
+             pass
 
         if 'direction' in b and (b['name']=='andar' or b['name']=='pegar' or b['name']=='pular'):
             blckArrow = Image.open(os.path.join(blocks_dir, 'seta.png'))
@@ -196,20 +206,31 @@ def generate_img_blocks(blocks,backGroundImageFile,OutputImageFile,OutputYoloFil
                 return
 
             blckArrow=blckArrow.resize((bnewwidth,bnewheight),Image.LANCZOS)
+            
+            # Rotation and Class Assignment
+            dir_suffix = 'up' # default
             if b['direction']=='up':
                 blckArrow=blckArrow.rotate(45*-1,expand=True,resample=Image.BICUBIC)
+                dir_suffix = 'up'
             if b['direction']=='down':
                 blckArrow=blckArrow.rotate(45*3,expand=True,resample=Image.BICUBIC)
+                dir_suffix = 'down'
             if b['direction']=='left':
                 blckArrow=blckArrow.rotate(45*1,expand=True,resample=Image.BICUBIC)
+                dir_suffix = 'left'
             if b['direction']=='right':
                 blckArrow=blckArrow.rotate(45*5,expand=True,resample=Image.BICUBIC)
+                dir_suffix = 'right'
             
             blocks_layer.paste(blckArrow,  (arrowX,arrowY), mask=blckArrow)
-            objects_to_transform.append({
-                'class': dicObj['seta'],
-                'rect': (arrowX, arrowY, blckArrow.size[0], blckArrow.size[1])
-            })
+            
+            # Granular Arrow Class
+            arrow_class_name = f"seta_{dir_suffix}"
+            if arrow_class_name in dicObj:
+                objects_to_transform.append({
+                    'class': dicObj[arrow_class_name],
+                    'rect': (arrowX, arrowY, blckArrow.size[0], blckArrow.size[1])
+                })
 
         if 'steps' in b:
             if b['steps']>1 and b['steps']<10:
@@ -224,10 +245,14 @@ def generate_img_blocks(blocks,backGroundImageFile,OutputImageFile,OutputYoloFil
 
                 blckMove=blckMove.resize((newwidth_move,newheight_move),Image.LANCZOS)
                 blocks_layer.paste(blckMove, (stepX,stepY), mask=blckMove)
-                objects_to_transform.append({
-                    'class': dicObj['numero'],
-                    'rect': (stepX, stepY, blckMove.size[0], blckMove.size[1])
-                })
+                
+                # Granular Number Class
+                digit_class_name = str(b['steps'])
+                if digit_class_name in dicObj:
+                    objects_to_transform.append({
+                        'class': dicObj[digit_class_name],
+                        'rect': (stepX, stepY, blckMove.size[0], blckMove.size[1])
+                    })
 
     # --- Perspective Transformation Step ---
     
@@ -358,7 +383,7 @@ if __name__ == '__main__':
     dirimg="./bg/"
     dirsets="./sets/"
     diroutput="../yolo_model/data/obj/"
-    loops=100
+    loops=20
     
     available_block_dirs = ['img_blocks'] + [f'img_blocks_p{i}' for i in range(1, 9)]
 
