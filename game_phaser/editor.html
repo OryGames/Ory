@@ -480,6 +480,12 @@
                 <input type="number" id="level-id" placeholder="ID" value="4" style="width:50px;">
             </div>
 
+            <h3>🤖 Personagem</h3>
+            <div class="level-info">
+                <input type="text" id="character-folder" placeholder="Nome da pasta" value="boxbot">
+                <p style="font-size:9px; color:#888; margin-top:4px;">Ex: boxbot, bluebot</p>
+            </div>
+
             <div class="actions">
                 <button class="action-btn primary" onclick="exportJSON()">📥 Exportar</button>
                 <button class="action-btn secondary" onclick="loadJSON()">📤 Importar</button>
@@ -897,6 +903,7 @@
                     rows: COLLECT_ROWS,
                     frameSize: COLLECT_SIZE
                 },
+                character: document.getElementById('character-folder').value || 'boxbot',
                 robotStart,
                 goalPosition,
                 victoryCondition,
@@ -933,6 +940,7 @@
                 document.getElementById('level-name').value = data.name || '';
                 document.getElementById('grid-width').value = data.gridWidth || 12;
                 document.getElementById('grid-height').value = data.gridHeight || 10;
+                document.getElementById('character-folder').value = data.character || 'boxbot';
 
                 gridWidth = data.gridWidth || 12;
                 gridHeight = data.gridHeight || 10;

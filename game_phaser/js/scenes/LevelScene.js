@@ -58,17 +58,31 @@ class LevelScene extends Phaser.Scene {
             frameHeight: collectConfig.frameSize
         });
 
-        // Load boxbot character sprites
-        const boxbotPath = './assets/sprites/characters/boxbot/';
-        this.load.image('player_down_idle', boxbotPath + 'player_down_idle.png');
-        this.load.image('player_down', boxbotPath + 'player_down.png');
-        this.load.image('player_down_1', boxbotPath + 'player_down_1.png');
-        this.load.image('player_up_idle', boxbotPath + 'player_up_idle.png');
-        this.load.image('player_up', boxbotPath + 'player_up.png');
-        this.load.image('player_up_1', boxbotPath + 'player_up_1.png');
-        this.load.image('player_right_idle', boxbotPath + 'player_right_idle.png');
-        this.load.image('player_right', boxbotPath + 'player_right.png');
-        this.load.image('player_right_1', boxbotPath + 'player_right_1.png');
+        // Load character sprites from level config (default: boxbot)
+        const charFolder = this.levelData.character || 'boxbot';
+        const charPath = `./assets/sprites/characters/${charFolder}/`;
+
+        // Clear existing character textures to force reload with new character
+        const playerKeys = [
+            'player_down_idle', 'player_down', 'player_down_1',
+            'player_up_idle', 'player_up', 'player_up_1',
+            'player_right_idle', 'player_right', 'player_right_1'
+        ];
+        playerKeys.forEach(key => {
+            if (this.textures.exists(key)) {
+                this.textures.remove(key);
+            }
+        });
+
+        this.load.image('player_down_idle', charPath + 'player_down_idle.png');
+        this.load.image('player_down', charPath + 'player_down.png');
+        this.load.image('player_down_1', charPath + 'player_down_1.png');
+        this.load.image('player_up_idle', charPath + 'player_up_idle.png');
+        this.load.image('player_up', charPath + 'player_up.png');
+        this.load.image('player_up_1', charPath + 'player_up_1.png');
+        this.load.image('player_right_idle', charPath + 'player_right_idle.png');
+        this.load.image('player_right', charPath + 'player_right.png');
+        this.load.image('player_right_1', charPath + 'player_right_1.png');
 
         // Start loading and call setup when done
         this.load.once('complete', () => this.setupLevel());

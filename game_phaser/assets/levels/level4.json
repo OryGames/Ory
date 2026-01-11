@@ -16,6 +16,7 @@
     "rows": 3,
     "frameSize": 340
   },
+  "character": "boxbot",
   "robotStart": {
     "x": 2,
     "y": 2,
