@@ -1,56 +1,65 @@
 class Robot {
-    constructor(scene, gridX, gridY, direction = 1) {
+    constructor(scene, gridX, gridY, direction = 2) {
         this.scene = scene;
         this.gridX = gridX;
         this.gridY = gridY;
         this.tileSize = scene.tileSize || 48;
-        this.direction = direction;
+        this.direction = direction; // 0=up, 1=right, 2=down, 3=left
         this.isMoving = false;
+        this.walkFrame = 0;
 
         const screenX = this.gridX * this.tileSize + this.tileSize / 2;
         const screenY = this.gridY * this.tileSize + this.tileSize / 2;
 
-        // Create sprite from loaded image
-        this.sprite = scene.add.image(screenX, screenY, 'robot');
-        this.sprite.setDisplaySize(42, 42);
+        // Direction to texture mapping
+        this.dirTextures = {
+            0: { idle: 'player_up_idle', walk: ['player_up', 'player_up_1'] },
+            1: { idle: 'player_right_idle', walk: ['player_right', 'player_right_1'] },
+            2: { idle: 'player_down_idle', walk: ['player_down', 'player_down_1'] },
+            3: { idle: 'player_right_idle', walk: ['player_right', 'player_right_1'], flipX: true }
+        };
+
+        // Create sprite with initial texture
+        this.sprite = scene.add.image(screenX, screenY, this.getIdleTexture());
+        this.sprite.setDisplaySize(this.tileSize * 0.9, this.tileSize * 1.8);
+        this.sprite.setOrigin(0.5, 0.75); // Anchor lower for proper positioning
         this.sprite.setDepth(100);
 
-        // Apply initial rotation
-        this.updateRotation(false);
+        // Apply initial flip for left direction
+        this.updateSpriteDirection();
 
         // Make interactive
         this.sprite.setInteractive({ useHandCursor: true });
     }
 
-    updateRotation(animate = true) {
-        const angles = [-90, 0, 90, 180];
-        const targetAngle = angles[this.direction];
+    getIdleTexture() {
+        return this.dirTextures[this.direction].idle;
+    }
 
-        if (animate) {
-            this.scene.tweens.add({
-                targets: this.sprite,
-                angle: targetAngle,
-                duration: 200,
-                ease: 'Sine.easeInOut'
-            });
-        } else {
-            this.sprite.angle = targetAngle;
-        }
+    getWalkTexture() {
+        const textures = this.dirTextures[this.direction].walk;
+        return textures[this.walkFrame % textures.length];
+    }
+
+    updateSpriteDirection() {
+        const dir = this.dirTextures[this.direction];
+        this.sprite.setTexture(dir.idle);
+        this.sprite.setFlipX(dir.flipX || false);
     }
 
     face(direction) {
         this.direction = direction;
-        this.updateRotation();
+        this.updateSpriteDirection();
     }
 
     turnRight() {
         this.direction = (this.direction + 1) % 4;
-        this.updateRotation();
+        this.updateSpriteDirection();
     }
 
     turnLeft() {
         this.direction = (this.direction - 1 + 4) % 4;
-        this.updateRotation();
+        this.updateSpriteDirection();
     }
 
     async moveForward(steps = 1) {
@@ -75,14 +84,20 @@ class Robot {
             const screenX = this.gridX * this.tileSize + this.tileSize / 2;
             const screenY = this.gridY * this.tileSize + this.tileSize / 2;
 
+            // Start walk animation
+            const walkAnim = this.startWalkAnimation();
+
             await new Promise(resolve => {
                 this.scene.tweens.add({
                     targets: this.sprite,
                     x: screenX,
                     y: screenY,
-                    duration: 250,
+                    duration: 300,
                     ease: 'Sine.easeInOut',
-                    onComplete: resolve
+                    onComplete: () => {
+                        this.stopWalkAnimation(walkAnim);
+                        resolve();
+                    }
                 });
             });
 
@@ -90,6 +105,27 @@ class Robot {
         }
 
         this.isMoving = false;
+    }
+
+    startWalkAnimation() {
+        const flip = this.dirTextures[this.direction].flipX || false;
+        this.walkFrame = 0;
+
+        return this.scene.time.addEvent({
+            delay: 100,
+            callback: () => {
+                this.walkFrame++;
+                this.sprite.setTexture(this.getWalkTexture());
+                this.sprite.setFlipX(flip);
+            },
+            loop: true
+        });
+    }
+
+    stopWalkAnimation(timerEvent) {
+        if (timerEvent) timerEvent.destroy();
+        this.sprite.setTexture(this.getIdleTexture());
+        this.sprite.setFlipX(this.dirTextures[this.direction].flipX || false);
     }
 
     async jump(steps = 1) {
@@ -114,23 +150,25 @@ class Robot {
         const screenX = this.gridX * this.tileSize + this.tileSize / 2;
         const screenY = this.gridY * this.tileSize + this.tileSize / 2;
 
+        // Jump animation
         await new Promise(resolve => {
+            // Jump up phase
             this.scene.tweens.add({
                 targets: this.sprite,
-                y: this.sprite.y - 30,
-                scaleX: 1.15,
-                scaleY: 0.85,
-                duration: 120,
-                yoyo: false,
+                y: this.sprite.y - 40,
+                scaleX: 1.1,
+                scaleY: 0.9,
+                duration: 150,
                 ease: 'Sine.easeOut',
                 onComplete: () => {
+                    // Arc and land phase
                     this.scene.tweens.add({
                         targets: this.sprite,
                         x: screenX,
                         y: screenY,
                         scaleX: 1,
                         scaleY: 1,
-                        duration: 200,
+                        duration: 250,
                         ease: 'Sine.easeIn',
                         onComplete: resolve
                     });

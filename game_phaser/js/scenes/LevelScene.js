@@ -57,7 +57,18 @@ class LevelScene extends Phaser.Scene {
             frameWidth: collectConfig.frameSize,
             frameHeight: collectConfig.frameSize
         });
-        this.load.image('robot', './assets/sprites/robot.png');
+
+        // Load boxbot character sprites
+        const boxbotPath = './assets/sprites/characters/boxbot/';
+        this.load.image('player_down_idle', boxbotPath + 'player_down_idle.png');
+        this.load.image('player_down', boxbotPath + 'player_down.png');
+        this.load.image('player_down_1', boxbotPath + 'player_down_1.png');
+        this.load.image('player_up_idle', boxbotPath + 'player_up_idle.png');
+        this.load.image('player_up', boxbotPath + 'player_up.png');
+        this.load.image('player_up_1', boxbotPath + 'player_up_1.png');
+        this.load.image('player_right_idle', boxbotPath + 'player_right_idle.png');
+        this.load.image('player_right', boxbotPath + 'player_right.png');
+        this.load.image('player_right_1', boxbotPath + 'player_right_1.png');
 
         // Start loading and call setup when done
         this.load.once('complete', () => this.setupLevel());
@@ -108,9 +119,9 @@ class LevelScene extends Phaser.Scene {
             }
         });
 
-        // Camera
-        this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
-        this.cameras.main.startFollow(this.robot.sprite, true, 0.1, 0.1);
+        // Camera - always keep robot centered (no bounds = can center freely)
+        this.cameras.main.startFollow(this.robot.sprite, true, 1, 1);
+        this.cameras.main.centerOn(this.robot.sprite.x, this.robot.sprite.y);
 
         // UI
         this.scene.launch('UIScene');

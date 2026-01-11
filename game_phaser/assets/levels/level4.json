@@ -19,11 +19,11 @@
   "robotStart": {
     "x": 2,
     "y": 2,
-    "direction": 1
+    "direction": 2
   },
   "goalPosition": {
-    "x": 10,
-    "y": 4
+    "x": 11,
+    "y": 6
   },
   "victoryCondition": "reachGoal",
   "tiles": [
@@ -486,6 +486,16 @@
       "frame": 3,
       "x": 10,
       "y": 1
+    },
+    {
+      "frame": 1,
+      "x": 8,
+      "y": 6
+    },
+    {
+      "frame": 1,
+      "x": 9,
+      "y": 6
     }
   ],
   "stars": {

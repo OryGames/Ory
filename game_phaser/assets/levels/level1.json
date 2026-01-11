@@ -7,7 +7,7 @@
     "robotStart": {
         "x": 1,
         "y": 1,
-        "direction": 1
+        "direction": 2
     },
     "tiles": [
         [
