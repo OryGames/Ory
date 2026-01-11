@@ -1,0 +1,14 @@
+path: /data/src/Ory/deeplearning/yolo_model/data
+train: train.txt
+val: val.txt
+names:
+  0: numero
+  1: andar
+  2: circulo
+  3: inicio
+  4: looping
+  5: pegar
+  6: pular
+  7: seta
+  8: triangulo
+  9: zzz

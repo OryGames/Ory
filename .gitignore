@@ -350,3 +350,8 @@ MigrationBackup/
 .ionide/
 deeplearning/dataset_generator/venv
 deeplearning/yolo_model/data/obj/**
+deeplearning/yolo_model/venv/**
+runs
+deeplearning/yolo_model/*.pt
+deeplearning/yolo_model/*.h5
+deeplearning/yolo_model/*.keras
