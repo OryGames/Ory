@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ory: Robot Coding Adventure</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2d2d2d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container"></div>
+
+    <!-- UI Overlay for Camera (Hidden by default, managed by Phaser/CSS) -->
+    <div id="camera-overlay" class="hidden">
+        <div class="camera-box">
+            <h2>Scan Your Code</h2>
+            <div class="video-wrapper">
+                <video id="webcam" autoplay playsinline muted></video>
+                <div id="scan-line"></div>
+            </div>
+            <div class="controls">
+                <button id="btn-capture">Capture Code</button>
+                <button id="btn-close">Close</button>
+            </div>
+            <div id="status-text">Waiting for camera...</div>
+        </div>
+    </div>
+
+    <!-- Game Scripts -->
+    <script src="js/vision/VisionHandler.js"></script>
+    <script src="js/logic/Interpreter.js"></script>
+    <script src="js/entities/Robot.js"></script>
+    <script src="js/scenes/LevelScene.js"></script>
+    <script src="js/scenes/UIScene.js"></script>
+    <script src="js/game.js"></script>
+
+</body>
+
+</html>

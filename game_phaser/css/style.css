@@ -1,0 +1,110 @@
+/* Basic Overlay Styles */
+#camera-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.camera-box {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    text-align: center;
+    width: 680px;
+    max-width: 90%;
+}
+
+.camera-box h2 {
+    margin-top: 0;
+    color: #00d4bb;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 640px;
+    height: 640px;
+    margin: 0 auto;
+    background: #000;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 2px solid #444;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Scan Line Animation */
+#scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+    animation: scan 2s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#btn-capture {
+    background: #00d4bb;
+    color: #000;
+}
+#btn-capture:hover {
+    background: #00ffdf;
+    transform: scale(1.05);
+}
+
+#btn-close {
+    background: #444;
+    color: white;
+}
+#btn-close:hover {
+    background: #555;
+}
+
+#status-text {
+    margin-top: 10px;
+    color: #888;
+    font-size: 14px;
+}
