@@ -1,5 +1,5 @@
 inicio=(300~500),(300~400)
-andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,down,2
-andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,right,6
-andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,down,2
-andar=last['x']+(-3~3),last['y']+(-3~3)+64+5,right,6
+andar=last['x']+(-3~3),last['y']+(-3~3)+66+5,down,2
+andar=last['x']+(-3~3),last['y']+(-3~3)+66+5,right,6
+andar=last['x']+(-3~3),last['y']+(-3~3)+66+5,down,2
+andar=last['x']+(-3~3),last['y']+(-3~3)+66+5,right,6
