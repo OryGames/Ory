@@ -1,0 +1,191 @@
+[
+    {
+        "filename": "2.png",
+        "rel_x": 0.018746338605741066,
+        "rel_y": 0.030274361400189215,
+        "rel_width": 0.08670181605155243,
+        "rel_height": 0.16367076631977295,
+        "original_width": 148,
+        "original_height": 173
+    },
+    {
+        "filename": "3.png",
+        "rel_x": 0.2114821323960164,
+        "rel_y": 0.030274361400189215,
+        "rel_width": 0.08670181605155243,
+        "rel_height": 0.16367076631977295,
+        "original_width": 148,
+        "original_height": 173
+    },
+    {
+        "filename": "4.png",
+        "rel_x": 0.40421792618629176,
+        "rel_y": 0.030274361400189215,
+        "rel_width": 0.08670181605155243,
+        "rel_height": 0.16367076631977295,
+        "original_width": 148,
+        "original_height": 173
+    },
+    {
+        "filename": "5.png",
+        "rel_x": 0.5969537199765671,
+        "rel_y": 0.030274361400189215,
+        "rel_width": 0.08670181605155243,
+        "rel_height": 0.16367076631977295,
+        "original_width": 148,
+        "original_height": 173
+    },
+    {
+        "filename": "6.png",
+        "rel_x": 0.7896895137668424,
+        "rel_y": 0.030274361400189215,
+        "rel_width": 0.08670181605155243,
+        "rel_height": 0.16367076631977295,
+        "original_width": 148,
+        "original_height": 173
+    },
+    {
+        "filename": "7.png",
+        "rel_x": 0.018746338605741066,
+        "rel_y": 0.2185430463576159,
+        "rel_width": 0.08904510837727006,
+        "rel_height": 0.1684011352885525,
+        "original_width": 152,
+        "original_height": 178
+    },
+    {
+        "filename": "8.png",
+        "rel_x": 0.2114821323960164,
+        "rel_y": 0.2185430463576159,
+        "rel_width": 0.08904510837727006,
+        "rel_height": 0.1693472090823084,
+        "original_width": 152,
+        "original_height": 179
+    },
+    {
+        "filename": "9.png",
+        "rel_x": 0.40421792618629176,
+        "rel_y": 0.2185430463576159,
+        "rel_width": 0.08904510837727006,
+        "rel_height": 0.1693472090823084,
+        "original_width": 152,
+        "original_height": 179
+    },
+    {
+        "filename": "andar.png",
+        "rel_x": 0.5969537199765671,
+        "rel_y": 0.2185430463576159,
+        "rel_width": 0.15114235500878734,
+        "rel_height": 0.1825922421948912,
+        "original_width": 258,
+        "original_height": 193
+    },
+    {
+        "filename": "circulo.png",
+        "rel_x": 0.7896895137668424,
+        "rel_y": 0.2185430463576159,
+        "rel_width": 0.19156414762741653,
+        "rel_height": 0.18353831598864712,
+        "original_width": 327,
+        "original_height": 194
+    },
+    {
+        "filename": "girardireita.png",
+        "rel_x": 0.018746338605741066,
+        "rel_y": 0.40681173131504256,
+        "rel_width": 0.19039250146455772,
+        "rel_height": 0.18637653736991486,
+        "original_width": 325,
+        "original_height": 197
+    },
+    {
+        "filename": "giraresquerda.png",
+        "rel_x": 0.2114821323960164,
+        "rel_y": 0.40681173131504256,
+        "rel_width": 0.19039250146455772,
+        "rel_height": 0.18637653736991486,
+        "original_width": 325,
+        "original_height": 197
+    },
+    {
+        "filename": "inicio.png",
+        "rel_x": 0.40421792618629176,
+        "rel_y": 0.40681173131504256,
+        "rel_width": 0.15114235500878734,
+        "rel_height": 0.1825922421948912,
+        "original_width": 258,
+        "original_height": 193
+    },
+    {
+        "filename": "lapisabaixado.png",
+        "rel_x": 0.5969537199765671,
+        "rel_y": 0.40681173131504256,
+        "rel_width": 0.14997070884592853,
+        "rel_height": 0.18353831598864712,
+        "original_width": 256,
+        "original_height": 194
+    },
+    {
+        "filename": "lapislevantado.png",
+        "rel_x": 0.7896895137668424,
+        "rel_y": 0.40681173131504256,
+        "rel_width": 0.14997070884592853,
+        "rel_height": 0.18353831598864712,
+        "original_width": 256,
+        "original_height": 194
+    },
+    {
+        "filename": "looping.png",
+        "rel_x": 0.018746338605741066,
+        "rel_y": 0.5950804162724692,
+        "rel_width": 0.19156414762741653,
+        "rel_height": 0.18353831598864712,
+        "original_width": 327,
+        "original_height": 194
+    },
+    {
+        "filename": "pegar.png",
+        "rel_x": 0.2114821323960164,
+        "rel_y": 0.5950804162724692,
+        "rel_width": 0.15114235500878734,
+        "rel_height": 0.1825922421948912,
+        "original_width": 258,
+        "original_height": 193
+    },
+    {
+        "filename": "pular.png",
+        "rel_x": 0.40421792618629176,
+        "rel_y": 0.5950804162724692,
+        "rel_width": 0.15114235500878734,
+        "rel_height": 0.1825922421948912,
+        "original_width": 258,
+        "original_height": 193
+    },
+    {
+        "filename": "seta.png",
+        "rel_x": 0.5969537199765671,
+        "rel_y": 0.5950804162724692,
+        "rel_width": 0.07264206209724663,
+        "rel_height": 0.11636707663197729,
+        "original_width": 124,
+        "original_height": 123
+    },
+    {
+        "filename": "triangulo.png",
+        "rel_x": 0.7896895137668424,
+        "rel_y": 0.5950804162724692,
+        "rel_width": 0.19156414762741653,
+        "rel_height": 0.18353831598864712,
+        "original_width": 327,
+        "original_height": 194
+    },
+    {
+        "filename": "zzz.png",
+        "rel_x": 0.018746338605741066,
+        "rel_y": 0.783349101229896,
+        "rel_width": 0.19156414762741653,
+        "rel_height": 0.18353831598864712,
+        "original_width": 327,
+        "original_height": 194
+    }
+]
