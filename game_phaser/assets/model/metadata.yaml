@@ -1,0 +1,39 @@
+description: Ultralytics best_c model trained on dataset.yaml
+author: Ultralytics
+date: '2026-01-12T06:42:16.214633'
+version: 8.3.252
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: andar
+  1: circulo
+  2: inicio
+  3: looping
+  4: pegar
+  5: pular
+  6: triangulo
+  7: zzz
+  8: '2'
+  9: '3'
+  10: '4'
+  11: '5'
+  12: '6'
+  13: '7'
+  14: '8'
+  15: '9'
+  16: seta_up
+  17: seta_down
+  18: seta_left
+  19: seta_right
+args:
+  batch: 1
+  half: false
+  int8: false
+  nms: false
+channels: 3

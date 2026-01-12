@@ -1,0 +1,4 @@
+inicio=(300~500),(300~400)
+looping=last['x']+(-3~3),last['y']+(-3~3)+66+5,none,(2~9)
+andar=last['x']+(-3~3)+22,last['y']+(-3~3)+66+5,down,(2~9)
+andar=last['x']+(-3~3),last['y']+(-3~3)+66+5,right,(2~9)

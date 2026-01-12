@@ -21,7 +21,7 @@ def export_model():
         return
         
     latest_train_dir = os.path.join(runs_dir, train_dirs[0])
-    weights_path = os.path.join(latest_train_dir, 'weights', 'best.pt')
+    weights_path = os.path.join(latest_train_dir, 'weights', 'best_c.pt')
     
     if not os.path.exists(weights_path):
         print(f"Error: Weights not found at {weights_path}")
