@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a3a2f">
+    <title>Ory: Contra Dengue 🦟</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Libraries -->
+    <script src="lib/phaser.min.js"></script>
+    <script src="lib/tf.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a3a2f 0%, #0d1f1a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container canvas {
+            display: block;
+            border-radius: 0;
+            box-shadow: 0 0 40px rgba(0, 212, 187, 0.3);
+        }
+
+        /* Desktop: add some border radius */
+        @media (min-width: 800px) {
+            #game-container canvas {
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container"></div>
+
+    <!-- Camera Overlay (Managed by CSS/JS) -->
+    <div id="camera-overlay" class="hidden">
+        <div class="camera-box">
+            <h2>📷 Escanear Código</h2>
+            <p class="subtitle">Mostre os blocos para a câmera</p>
+            <div class="video-wrapper">
+                <video id="webcam" autoplay playsinline muted></video>
+                <div id="scan-line"></div>
+            </div>
+            <div class="controls">
+                <button id="btn-capture">✅ Capturar</button>
+                <button id="btn-close">❌ Fechar</button>
+            </div>
+            <div id="status-text">Carregando modelo de IA...</div>
+        </div>
+    </div>
+
+    <!-- Game Scripts (Order matters!) -->
+    <script src="js/vision/VisionHandler.js"></script>
+    <script src="js/logic/Interpreter.js"></script>
+    <script src="js/entities/Robot.js"></script>
+    <script src="js/scenes/PreloaderScene.js"></script>
+    <script src="js/scenes/SplashScene.js"></script>
+    <script src="js/scenes/InfoScene.js"></script>
+    <script src="js/scenes/CutsceneScene.js"></script>
+    <script src="js/scenes/CreditsScene.js"></script>
+    <script src="js/scenes/TitleScene.js"></script>
+    <script src="js/scenes/MenuScene.js"></script>
+    <script src="js/scenes/LevelScene.js"></script>
+    <script src="js/scenes/LevelCompleteScene.js"></script>
+    <script src="js/scenes/UIScene.js"></script>
+    <script src="js/game.js"></script>
+
+</body>
+
+</html>

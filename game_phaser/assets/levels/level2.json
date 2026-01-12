@@ -1,0 +1,515 @@
+{
+    "id": 2,
+    "name": "A rua",
+    "music": "./assets/audio/music/Ory_inlevel2.mp3",
+    "gridWidth": 12,
+    "gridHeight": 10,
+    "tileSize": 64,
+    "tileset": {
+        "path": "./assets/sprites/tile.png",
+        "cols": 23,
+        "rows": 8,
+        "tileSize": 16
+    },
+    "collectiblesSprite": {
+        "path": "./assets/sprites/collectibles.png",
+        "cols": 3,
+        "rows": 3,
+        "frameSize": 340
+    },
+    "character": "boxbot",
+    "robotStart": {
+        "x": 2,
+        "y": 2,
+        "direction": 2
+    },
+    "goalPosition": {
+        "x": 11,
+        "y": 6
+    },
+    "victoryCondition": "reachGoal",
+    "tiles": [
+        [
+            69,
+            73,
+            73,
+            73,
+            73,
+            73,
+            74,
+            183,
+            46,
+            50,
+            50,
+            50
+        ],
+        [
+            69,
+            89,
+            90,
+            22,
+            73,
+            73,
+            74,
+            183,
+            46,
+            50,
+            50,
+            50
+        ],
+        [
+            69,
+            112,
+            113,
+            113,
+            111,
+            22,
+            74,
+            183,
+            46,
+            50,
+            50,
+            50
+        ],
+        [
+            69,
+            135,
+            136,
+            68,
+            19,
+            45,
+            74,
+            183,
+            46,
+            89,
+            90,
+            91
+        ],
+        [
+            69,
+            73,
+            73,
+            73,
+            73,
+            135,
+            67,
+            183,
+            111,
+            110,
+            85,
+            114
+        ],
+        [
+            69,
+            73,
+            73,
+            73,
+            73,
+            73,
+            74,
+            183,
+            46,
+            135,
+            136,
+            137
+        ],
+        [
+            69,
+            73,
+            73,
+            73,
+            73,
+            73,
+            74,
+            183,
+            92,
+            93,
+            93,
+            93
+        ],
+        [
+            92,
+            93,
+            93,
+            93,
+            93,
+            93,
+            97,
+            183,
+            115,
+            117,
+            117,
+            117
+        ],
+        [
+            115,
+            116,
+            116,
+            116,
+            116,
+            116,
+            119,
+            183,
+            138,
+            140,
+            140,
+            140
+        ],
+        [
+            138,
+            139,
+            139,
+            139,
+            139,
+            139,
+            142,
+            183,
+            161,
+            162,
+            162,
+            162
+        ]
+    ],
+    "decorations": [
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            77,
+            78,
+            79,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ],
+        [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        ]
+    ],
+    "blocked": [
+        {
+            "x": 7,
+            "y": 0
+        },
+        {
+            "x": 7,
+            "y": 1
+        },
+        {
+            "x": 7,
+            "y": 2
+        },
+        {
+            "x": 4,
+            "y": 3
+        },
+        {
+            "x": 7,
+            "y": 3
+        },
+        {
+            "x": 7,
+            "y": 5
+        },
+        {
+            "x": 7,
+            "y": 6
+        },
+        {
+            "x": 7,
+            "y": 7
+        },
+        {
+            "x": 8,
+            "y": 7
+        },
+        {
+            "x": 9,
+            "y": 7
+        },
+        {
+            "x": 10,
+            "y": 7
+        },
+        {
+            "x": 11,
+            "y": 7
+        },
+        {
+            "x": 0,
+            "y": 8
+        },
+        {
+            "x": 1,
+            "y": 8
+        },
+        {
+            "x": 2,
+            "y": 8
+        },
+        {
+            "x": 3,
+            "y": 8
+        },
+        {
+            "x": 4,
+            "y": 8
+        },
+        {
+            "x": 5,
+            "y": 8
+        },
+        {
+            "x": 6,
+            "y": 8
+        },
+        {
+            "x": 7,
+            "y": 8
+        },
+        {
+            "x": 8,
+            "y": 8
+        },
+        {
+            "x": 9,
+            "y": 8
+        },
+        {
+            "x": 10,
+            "y": 8
+        },
+        {
+            "x": 11,
+            "y": 8
+        },
+        {
+            "x": 0,
+            "y": 9
+        },
+        {
+            "x": 1,
+            "y": 9
+        },
+        {
+            "x": 2,
+            "y": 9
+        },
+        {
+            "x": 3,
+            "y": 9
+        },
+        {
+            "x": 4,
+            "y": 9
+        },
+        {
+            "x": 5,
+            "y": 9
+        },
+        {
+            "x": 6,
+            "y": 9
+        },
+        {
+            "x": 7,
+            "y": 9
+        },
+        {
+            "x": 8,
+            "y": 9
+        },
+        {
+            "x": 9,
+            "y": 9
+        },
+        {
+            "x": 10,
+            "y": 9
+        },
+        {
+            "x": 11,
+            "y": 9
+        }
+    ],
+    "collectibles": [
+        {
+            "frame": 0,
+            "x": 4,
+            "y": 6
+        },
+        {
+            "frame": 0,
+            "x": 1,
+            "y": 6
+        },
+        {
+            "frame": 1,
+            "x": 5,
+            "y": 0
+        },
+        {
+            "frame": 1,
+            "x": 6,
+            "y": 1
+        },
+        {
+            "frame": 2,
+            "x": 11,
+            "y": 0
+        },
+        {
+            "frame": 3,
+            "x": 10,
+            "y": 1
+        },
+        {
+            "frame": 1,
+            "x": 8,
+            "y": 6
+        },
+        {
+            "frame": 1,
+            "x": 9,
+            "y": 6
+        }
+    ],
+    "stars": {
+        "time": [
+            120,
+            90,
+            60
+        ],
+        "attempts": [
+            6,
+            4,
+            2
+        ]
+    }
+}

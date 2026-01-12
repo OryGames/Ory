@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ory: Editor de Níveis 🎨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00d4bb;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: #252540;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: #00d4bb;
+            margin: 12px 0 6px 0;
+            font-size: 12px;
+        }
+
+        .sidebar h3:first-child {
+            margin-top: 0;
+        }
+
+        /* Tileset Config */
+        .tileset-config {
+            background: #1a1a2e;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tileset-config label {
+            font-size: 11px;
+            display: block;
+            margin: 4px 0;
+        }
+
+        .tileset-config input[type="file"] {
+            font-size: 11px;
+            width: 100%;
+        }
+
+        .tileset-config input[type="number"],
+        .tileset-config input[type="text"] {
+            width: 60px;
+            padding: 3px;
+            border: none;
+            border-radius: 3px;
+            background: #3a3a5a;
+            color: #fff;
+            font-size: 11px;
+        }
+
+        .tileset-config input[type="text"] {
+            width: 100%;
+        }
+
+        .tileset-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 4px 0;
+        }
+
+        .tileset-row span {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* Tileset Palette */
+        .tileset-palette {
+            display: grid;
+            gap: 1px;
+            background: #000;
+            padding: 4px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tileset-tile {
+            cursor: pointer;
+            border: 2px solid transparent;
+            image-rendering: pixelated;
+        }
+
+        .tileset-tile:hover {
+            border-color: #fff;
+        }
+
+        .tileset-tile.selected {
+            border-color: #00d4bb;
+            box-shadow: 0 0 5px #00d4bb;
+        }
+
+        /* Layer Toggle */
+        .layer-toggle {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .layer-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .layer-btn.base {
+            background: #4a5a4a;
+            color: #fff;
+        }
+
+        .layer-btn.decor {
+            background: #5a4a5a;
+            color: #fff;
+        }
+
+        .layer-btn.active {
+            outline: 3px solid #00d4bb;
+        }
+
+        /* Walkability Toggle */
+        .walkability-toggle {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .walkability-btn {
+            flex: 1;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .walkability-btn.walkable {
+            background: #4a7c59;
+            color: #fff;
+        }
+
+        .walkability-btn.blocked {
+            background: #7c4a4a;
+            color: #fff;
+        }
+
+        .walkability-btn.active {
+            outline: 2px solid #00d4bb;
+        }
+
+        /* Tools */
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-bottom: 8px;
+        }
+
+        .tool-btn {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            background: #3a3a5a;
+            color: #fff;
+        }
+
+        .tool-btn:hover {
+            background: #4a4a7a;
+        }
+
+        .tool-btn.active {
+            background: #00d4bb;
+            color: #000;
+        }
+
+        /* Grid Size */
+        .grid-size {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .grid-size label {
+            font-size: 10px;
+        }
+
+        .grid-size input {
+            width: 40px;
+            padding: 3px;
+            border: none;
+            border-radius: 3px;
+            background: #3a3a5a;
+            color: #fff;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        /* Victory Condition */
+        .victory-condition {
+            margin-bottom: 8px;
+        }
+
+        .victory-option {
+            display: block;
+            padding: 6px;
+            margin: 3px 0;
+            background: #3a3a5a;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .victory-option:hover {
+            background: #4a4a7a;
+        }
+
+        .victory-option.active {
+            background: #00d4bb;
+            color: #000;
+        }
+
+        .victory-option input {
+            margin-right: 5px;
+        }
+
+        /* Level Info */
+        .level-info input {
+            width: 100%;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #3a3a5a;
+            color: #fff;
+            margin: 3px 0;
+            font-size: 11px;
+        }
+
+        /* Actions */
+        .actions {
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 8px;
+            margin: 3px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .action-btn.primary {
+            background: #00d4bb;
+            color: #000;
+        }
+
+        .action-btn.secondary {
+            background: #3a3a5a;
+            color: #fff;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Canvas */
+        .editor-area {
+            flex: 1;
+            min-width: 500px;
+        }
+
+        #grid-canvas {
+            background: #1a1a2e;
+            border: 2px solid #00d4bb;
+            border-radius: 5px;
+            cursor: crosshair;
+            image-rendering: pixelated;
+        }
+
+        .legend {
+            margin-top: 6px;
+            padding: 6px;
+            background: #252540;
+            border-radius: 4px;
+            font-size: 9px;
+        }
+
+        .legend span {
+            margin-right: 10px;
+        }
+
+        .json-output {
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #json-textarea {
+            width: 100%;
+            height: 100px;
+            background: #252540;
+            color: #0f0;
+            border: 1px solid #3a3a5a;
+            border-radius: 4px;
+            padding: 6px;
+            font-family: monospace;
+            font-size: 9px;
+        }
+
+        .status {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: #252540;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .collectible-btns {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .collect-btn {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            background: #3a3a5a;
+        }
+
+        .collect-btn:hover {
+            background: #4a4a7a;
+        }
+
+        .collect-btn.active {
+            background: #00d4bb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎨 Editor de Níveis - Ory</h1>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>🖼️ Tileset</h3>
+            <div class="tileset-config">
+                <label>Carregar PNG:</label>
+                <input type="file" id="tileset-upload" accept="image/png">
+                <div class="tileset-row">
+                    <label>Caminho:</label>
+                    <input type="text" id="tileset-path" value="./assets/sprites/tile.png"
+                        placeholder="./assets/sprites/tile.png">
+                </div>
+                <div class="tileset-row">
+                    <label>Cols:</label>
+                    <input type="number" id="tileset-cols" value="11" min="1" max="50">
+                    <label>Rows:</label>
+                    <input type="number" id="tileset-rows" value="7" min="1" max="50">
+                    <label>Tile:</label>
+                    <input type="number" id="tileset-tilesize" value="32" min="8" max="128">
+                    <button class="tool-btn" onclick="applyTilesetConfig()">OK</button>
+                </div>
+            </div>
+
+            <h3>🎨 Paleta</h3>
+            <div class="tileset-palette" id="tileset-palette"></div>
+
+            <h3>📚 Camada</h3>
+            <div class="layer-toggle">
+                <button class="layer-btn base active" id="layer-base" onclick="setLayer('base')">🌿 Base</button>
+                <button class="layer-btn decor" id="layer-decor" onclick="setLayer('decor')">🌳 Decoração</button>
+            </div>
+
+            <div class="walkability-toggle">
+                <button class="walkability-btn walkable active" id="walk-yes" onclick="setWalkable(true)">✅
+                    Andável</button>
+                <button class="walkability-btn blocked" id="walk-no" onclick="setWalkable(false)">🚫 Bloqueado</button>
+            </div>
+
+            <h3>🛠️ Ferramentas</h3>
+            <div class="tools">
+                <button class="tool-btn active" id="tool-tile" onclick="setTool('tile')">🎨 Tile</button>
+                <button class="tool-btn" id="tool-collectible" onclick="setTool('collectible')">🗑️ Coletável</button>
+                <button class="tool-btn" id="tool-robot" onclick="setTool('robot')">🤖 Início</button>
+                <button class="tool-btn" id="tool-goal" onclick="setTool('goal')">🏁 Destino</button>
+                <button class="tool-btn" id="tool-erase" onclick="setTool('erase')">🧹 Apagar</button>
+            </div>
+
+            <h3>🗑️ Coletáveis - Sprite</h3>
+            <div class="tileset-config">
+                <label>Carregar PNG:</label>
+                <input type="file" id="collectibles-upload" accept="image/png">
+                <div class="tileset-row">
+                    <label>Caminho:</label>
+                    <input type="text" id="collectibles-path" value="./assets/sprites/collectibles.png">
+                </div>
+                <div class="tileset-row">
+                    <label>Cols:</label>
+                    <input type="number" id="collectibles-cols" value="3" min="1" max="20">
+                    <label>Rows:</label>
+                    <input type="number" id="collectibles-rows" value="1" min="1" max="20">
+                    <label>Size:</label>
+                    <input type="number" id="collectibles-size" value="64" min="8" max="256">
+                    <button class="tool-btn" onclick="applyCollectiblesConfig()">OK</button>
+                </div>
+            </div>
+
+            <h3>🎯 Selecionar Coletável</h3>
+            <div class="tileset-palette" id="collectibles-palette" style="max-height:100px;"></div>
+
+            <h3>🏆 Vitória</h3>
+            <div class="victory-condition">
+                <label class="victory-option active" onclick="setVictory('collectAll')">
+                    <input type="radio" name="victory" value="collectAll" checked> Coletar tudo
+                </label>
+                <label class="victory-option" onclick="setVictory('reachGoal')">
+                    <input type="radio" name="victory" value="reachGoal"> Chegar no 🏁
+                </label>
+                <label class="victory-option" onclick="setVictory('both')">
+                    <input type="radio" name="victory" value="both"> Ambos
+                </label>
+            </div>
+
+            <h3>📐 Tamanho</h3>
+            <div class="grid-size">
+                <label>W:</label><input type="number" id="grid-width" value="12" min="5" max="30">
+                <label>H:</label><input type="number" id="grid-height" value="10" min="5" max="20">
+                <button class="tool-btn" onclick="resizeGrid()">OK</button>
+            </div>
+
+            <h3>📝 Info</h3>
+            <div class="level-info">
+                <input type="text" id="level-name" placeholder="Nome" value="Novo Nível">
+                <input type="number" id="level-id" placeholder="ID" value="4" style="width:50px;">
+            </div>
+
+            <h3>🤖 Personagem</h3>
+            <div class="level-info">
+                <input type="text" id="character-folder" placeholder="Nome da pasta" value="boxbot">
+                <p style="font-size:9px; color:#888; margin-top:4px;">Ex: boxbot, bluebot</p>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn primary" onclick="exportJSON()">📥 Exportar</button>
+                <button class="action-btn secondary" onclick="loadJSON()">📤 Importar</button>
+                <button class="action-btn secondary" onclick="clearGrid()">🗑️ Limpar</button>
+            </div>
+        </div>
+
+        <div class="editor-area">
+            <canvas id="grid-canvas"></canvas>
+            <div class="legend">
+                <span>🤖 Início</span>
+                <span>🏁 Destino</span>
+                <span>🔴 Bloqueado</span>
+            </div>
+            <div class="json-output">
+                <h3 style="color:#00d4bb; margin-bottom:6px; font-size:11px;">📄 JSON</h3>
+                <textarea id="json-textarea" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="status" id="status">Pronto!</div>
+    <img id="tileset-img" src="./assets/sprites/tile.png" style="display:none;">
+    <img id="collectibles-img" src="./assets/sprites/collectibles.png" style="display:none;">
+
+    <script>
+        // Tileset config
+        let TILESET_COLS = 11;
+        let TILESET_ROWS = 7;
+        let TILE_SRC_SIZE = 32;
+        let TILESET_PATH = './assets/sprites/tile.png';
+
+        // Collectibles config
+        let COLLECT_COLS = 3;
+        let COLLECT_ROWS = 1;
+        let COLLECT_SIZE = 64;
+        let COLLECT_PATH = './assets/sprites/collectibles.png';
+
+        let gridWidth = 12;
+        let gridHeight = 10;
+        let tileSize = 40;
+        let paletteTileSize = 26;
+        let collectPaletteSize = 40;
+
+        let currentTool = 'tile';
+        let currentTileFrame = 0;
+        let currentCollectFrame = 0;
+        let currentLayer = 'base';
+        let currentWalkable = true;
+        let victoryCondition = 'collectAll';
+
+        let tiles = [];
+        let collectibles = [];
+        let robotStart = { x: 1, y: 1, direction: 1 };
+        let goalPosition = null;
+
+        const canvas = document.getElementById('grid-canvas');
+        const ctx = canvas.getContext('2d');
+        const tilesetImg = document.getElementById('tileset-img');
+        const collectiblesImg = document.getElementById('collectibles-img');
+
+        // Tileset file upload
+        document.getElementById('tileset-upload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    tilesetImg.src = evt.target.result;
+                    // Auto-detect dimensions
+                    tilesetImg.onload = function () {
+                        const detectedCols = Math.floor(tilesetImg.naturalWidth / TILE_SRC_SIZE);
+                        const detectedRows = Math.floor(tilesetImg.naturalHeight / TILE_SRC_SIZE);
+                        document.getElementById('tileset-cols').value = detectedCols;
+                        document.getElementById('tileset-rows').value = detectedRows;
+                        TILESET_COLS = detectedCols;
+                        TILESET_ROWS = detectedRows;
+                        buildPalette();
+                        render();
+                        setStatus(`Tileset carregado: ${detectedCols}x${detectedRows}`);
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function applyTilesetConfig() {
+            TILESET_COLS = parseInt(document.getElementById('tileset-cols').value) || 11;
+            TILESET_ROWS = parseInt(document.getElementById('tileset-rows').value) || 7;
+            TILE_SRC_SIZE = parseInt(document.getElementById('tileset-tilesize').value) || 32;
+            TILESET_PATH = document.getElementById('tileset-path').value || './assets/sprites/tile.png';
+
+            // Load from path if not using uploaded file
+            if (!document.getElementById('tileset-upload').files.length) {
+                tilesetImg.src = TILESET_PATH;
+            }
+
+            buildPalette();
+            render();
+            updateJSON();
+            setStatus(`Tileset: ${TILESET_COLS}x${TILESET_ROWS} @ ${TILE_SRC_SIZE}px`);
+        }
+
+        function buildPalette() {
+            const palette = document.getElementById('tileset-palette');
+            palette.innerHTML = '';
+            palette.style.gridTemplateColumns = `repeat(${TILESET_COLS}, ${paletteTileSize}px)`;
+
+            // Update CSS background size dynamically
+            const bgW = TILESET_COLS * paletteTileSize;
+            const bgH = TILESET_ROWS * paletteTileSize;
+
+            for (let i = 0; i < TILESET_COLS * TILESET_ROWS; i++) {
+                const col = i % TILESET_COLS;
+                const row = Math.floor(i / TILESET_COLS);
+
+                const tile = document.createElement('div');
+                tile.className = 'tileset-tile' + (i === 0 ? ' selected' : '');
+                tile.dataset.frame = i;
+                tile.style.width = paletteTileSize + 'px';
+                tile.style.height = paletteTileSize + 'px';
+                tile.style.backgroundImage = `url('${tilesetImg.src}')`;
+                tile.style.backgroundSize = `${bgW}px ${bgH}px`;
+                tile.style.backgroundPosition = `-${col * paletteTileSize}px -${row * paletteTileSize}px`;
+                tile.onclick = () => selectTileFrame(i);
+                palette.appendChild(tile);
+            }
+        }
+
+        function selectTileFrame(frame) {
+            currentTileFrame = frame;
+            document.querySelectorAll('.tileset-tile').forEach((t, i) => {
+                t.classList.toggle('selected', i === frame);
+            });
+            setTool('tile');
+        }
+
+        function setLayer(layer) {
+            currentLayer = layer;
+            document.getElementById('layer-base').classList.toggle('active', layer === 'base');
+            document.getElementById('layer-decor').classList.toggle('active', layer === 'decor');
+        }
+
+        function setWalkable(walkable) {
+            currentWalkable = walkable;
+            document.getElementById('walk-yes').classList.toggle('active', walkable);
+            document.getElementById('walk-no').classList.toggle('active', !walkable);
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tools .tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tool-' + tool)?.classList.add('active');
+        }
+
+        // Collectibles sprite handling
+        document.getElementById('collectibles-upload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    collectiblesImg.src = evt.target.result;
+                    collectiblesImg.onload = function () {
+                        const detectedCols = Math.floor(collectiblesImg.naturalWidth / COLLECT_SIZE);
+                        const detectedRows = Math.floor(collectiblesImg.naturalHeight / COLLECT_SIZE);
+                        document.getElementById('collectibles-cols').value = detectedCols;
+                        document.getElementById('collectibles-rows').value = detectedRows;
+                        COLLECT_COLS = detectedCols;
+                        COLLECT_ROWS = detectedRows;
+                        buildCollectiblesPalette();
+                        render();
+                        setStatus(`Collectibles: ${detectedCols}x${detectedRows}`);
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function applyCollectiblesConfig() {
+            COLLECT_COLS = parseInt(document.getElementById('collectibles-cols').value) || 3;
+            COLLECT_ROWS = parseInt(document.getElementById('collectibles-rows').value) || 1;
+            COLLECT_SIZE = parseInt(document.getElementById('collectibles-size').value) || 64;
+            COLLECT_PATH = document.getElementById('collectibles-path').value || './assets/sprites/collectibles.png';
+
+            if (!document.getElementById('collectibles-upload').files.length) {
+                collectiblesImg.src = COLLECT_PATH;
+            }
+
+            buildCollectiblesPalette();
+            render();
+            updateJSON();
+            setStatus(`Collectibles: ${COLLECT_COLS}x${COLLECT_ROWS} @ ${COLLECT_SIZE}px`);
+        }
+
+        function buildCollectiblesPalette() {
+            const palette = document.getElementById('collectibles-palette');
+            palette.innerHTML = '';
+            palette.style.gridTemplateColumns = `repeat(${COLLECT_COLS}, ${collectPaletteSize}px)`;
+
+            const bgW = COLLECT_COLS * collectPaletteSize;
+            const bgH = COLLECT_ROWS * collectPaletteSize;
+
+            for (let i = 0; i < COLLECT_COLS * COLLECT_ROWS; i++) {
+                const col = i % COLLECT_COLS;
+                const row = Math.floor(i / COLLECT_COLS);
+
+                const tile = document.createElement('div');
+                tile.className = 'tileset-tile' + (i === 0 ? ' selected' : '');
+                tile.dataset.frame = i;
+                tile.style.width = collectPaletteSize + 'px';
+                tile.style.height = collectPaletteSize + 'px';
+                tile.style.backgroundImage = `url('${collectiblesImg.src}')`;
+                tile.style.backgroundSize = `${bgW}px ${bgH}px`;
+                tile.style.backgroundPosition = `-${col * collectPaletteSize}px -${row * collectPaletteSize}px`;
+                tile.onclick = () => selectCollectFrame(i);
+                palette.appendChild(tile);
+            }
+        }
+
+        function selectCollectFrame(frame) {
+            currentCollectFrame = frame;
+            document.querySelectorAll('#collectibles-palette .tileset-tile').forEach((t, i) => {
+                t.classList.toggle('selected', i === frame);
+            });
+            setTool('collectible');
+        }
+
+        function setVictory(condition) {
+            victoryCondition = condition;
+            document.querySelectorAll('.victory-option').forEach(opt => {
+                opt.classList.toggle('active', opt.querySelector('input').value === condition);
+            });
+            updateJSON();
+        }
+
+        function initGrid() {
+            tiles = [];
+            for (let y = 0; y < gridHeight; y++) {
+                tiles[y] = [];
+                for (let x = 0; x < gridWidth; x++) {
+                    tiles[y][x] = { base: 0, decor: null, walkable: true };
+                }
+            }
+        }
+
+        function resizeGrid() {
+            const newW = parseInt(document.getElementById('grid-width').value) || 12;
+            const newH = parseInt(document.getElementById('grid-height').value) || 10;
+
+            const newTiles = [];
+            for (let y = 0; y < newH; y++) {
+                newTiles[y] = [];
+                for (let x = 0; x < newW; x++) {
+                    newTiles[y][x] = tiles[y]?.[x] ?? { base: 0, decor: null, walkable: true };
+                }
+            }
+
+            gridWidth = newW;
+            gridHeight = newH;
+            tiles = newTiles;
+
+            collectibles = collectibles.filter(c => c.x < gridWidth && c.y < gridHeight);
+            robotStart.x = Math.min(robotStart.x, gridWidth - 1);
+            robotStart.y = Math.min(robotStart.y, gridHeight - 1);
+            if (goalPosition) {
+                goalPosition.x = Math.min(goalPosition.x, gridWidth - 1);
+                goalPosition.y = Math.min(goalPosition.y, gridHeight - 1);
+            }
+
+            canvas.width = gridWidth * tileSize;
+            canvas.height = gridHeight * tileSize;
+
+            render();
+            updateJSON();
+        }
+
+        function clearGrid() {
+            initGrid();
+            collectibles = [];
+            robotStart = { x: 1, y: 1, direction: 1 };
+            goalPosition = null;
+            render();
+            updateJSON();
+        }
+
+        let isDrawing = false;
+        canvas.addEventListener('mousedown', e => { isDrawing = true; handleDraw(e); });
+        canvas.addEventListener('mousemove', e => { if (isDrawing) handleDraw(e); });
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+        function handleDraw(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / tileSize);
+            const y = Math.floor((e.clientY - rect.top) / tileSize);
+
+            if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) return;
+
+            switch (currentTool) {
+                case 'tile':
+                    if (currentLayer === 'base') {
+                        tiles[y][x].base = currentTileFrame;
+                        tiles[y][x].walkable = currentWalkable;
+                    } else {
+                        tiles[y][x].decor = currentTileFrame;
+                        if (!currentWalkable) tiles[y][x].walkable = false;
+                    }
+                    break;
+                case 'collectible':
+                    const idx = collectibles.findIndex(c => c.x === x && c.y === y);
+                    if (idx >= 0) collectibles[idx].frame = currentCollectFrame;
+                    else collectibles.push({ frame: currentCollectFrame, x, y });
+                    break;
+                case 'robot':
+                    robotStart = { x, y, direction: 1 };
+                    break;
+                case 'goal':
+                    goalPosition = { x, y };
+                    break;
+                case 'erase':
+                    if (currentLayer === 'base') {
+                        tiles[y][x].base = 0;
+                        tiles[y][x].walkable = true;
+                    } else {
+                        tiles[y][x].decor = null;
+                    }
+                    collectibles = collectibles.filter(c => c.x !== x || c.y !== y);
+                    if (goalPosition && goalPosition.x === x && goalPosition.y === y) goalPosition = null;
+                    break;
+            }
+
+            render();
+            updateJSON();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    const tile = tiles[y][x];
+                    drawTileFrame(tile.base, x, y);
+                    if (tile.decor !== null) drawTileFrame(tile.decor, x, y);
+
+                    if (!tile.walkable) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
+
+                    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                    ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+
+            // Draw collectibles from sprite
+            for (const c of collectibles) {
+                const frame = c.frame ?? 0;
+                const srcX = (frame % COLLECT_COLS) * COLLECT_SIZE;
+                const srcY = Math.floor(frame / COLLECT_COLS) * COLLECT_SIZE;
+                ctx.drawImage(
+                    collectiblesImg,
+                    srcX, srcY, COLLECT_SIZE, COLLECT_SIZE,
+                    c.x * tileSize + 4, c.y * tileSize + 4, tileSize - 8, tileSize - 8
+                );
+            }
+
+            if (goalPosition) {
+                ctx.fillText('🏁', goalPosition.x * tileSize + tileSize / 2, goalPosition.y * tileSize + tileSize / 2);
+            }
+
+            ctx.fillStyle = '#00d4bb';
+            ctx.beginPath();
+            ctx.arc(robotStart.x * tileSize + tileSize / 2, robotStart.y * tileSize + tileSize / 2, tileSize / 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = '11px sans-serif';
+            ctx.fillStyle = '#000';
+            ctx.fillText('🤖', robotStart.x * tileSize + tileSize / 2, robotStart.y * tileSize + tileSize / 2);
+        }
+
+        function drawTileFrame(frame, x, y) {
+            const srcX = (frame % TILESET_COLS) * TILE_SRC_SIZE;
+            const srcY = Math.floor(frame / TILESET_COLS) * TILE_SRC_SIZE;
+            ctx.drawImage(
+                tilesetImg,
+                srcX, srcY, TILE_SRC_SIZE, TILE_SRC_SIZE,
+                x * tileSize, y * tileSize, tileSize, tileSize
+            );
+        }
+
+        function updateJSON() {
+            const baseTiles = tiles.map(row => row.map(t => t.base));
+            const decorTiles = tiles.map(row => row.map(t => t.decor));
+            const blocked = [];
+
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    if (!tiles[y][x].walkable) blocked.push({ x, y });
+                }
+            }
+
+            const data = {
+                id: parseInt(document.getElementById('level-id').value) || 1,
+                name: document.getElementById('level-name').value || 'Novo Nível',
+                gridWidth,
+                gridHeight,
+                tileSize: 64,
+                tileset: {
+                    path: document.getElementById('tileset-path').value || TILESET_PATH,
+                    cols: TILESET_COLS,
+                    rows: TILESET_ROWS,
+                    tileSize: TILE_SRC_SIZE
+                },
+                collectiblesSprite: {
+                    path: document.getElementById('collectibles-path').value || COLLECT_PATH,
+                    cols: COLLECT_COLS,
+                    rows: COLLECT_ROWS,
+                    frameSize: COLLECT_SIZE
+                },
+                character: document.getElementById('character-folder').value || 'boxbot',
+                robotStart,
+                goalPosition,
+                victoryCondition,
+                tiles: baseTiles,
+                decorations: decorTiles,
+                blocked,
+                collectibles,
+                stars: { time: [120, 90, 60], attempts: [6, 4, 2] }
+            };
+
+            document.getElementById('json-textarea').value = JSON.stringify(data, null, 2);
+        }
+
+        function exportJSON() {
+            updateJSON();
+            const json = document.getElementById('json-textarea').value;
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'level' + (document.getElementById('level-id').value || 'X') + '.json';
+            a.click();
+            setStatus('Exportado!');
+        }
+
+        function loadJSON() {
+            const json = prompt('Cole o JSON:');
+            if (!json) return;
+
+            try {
+                const data = JSON.parse(json);
+
+                document.getElementById('level-id').value = data.id || 1;
+                document.getElementById('level-name').value = data.name || '';
+                document.getElementById('grid-width').value = data.gridWidth || 12;
+                document.getElementById('grid-height').value = data.gridHeight || 10;
+                document.getElementById('character-folder').value = data.character || 'boxbot';
+
+                gridWidth = data.gridWidth || 12;
+                gridHeight = data.gridHeight || 10;
+
+                tiles = [];
+                for (let y = 0; y < gridHeight; y++) {
+                    tiles[y] = [];
+                    for (let x = 0; x < gridWidth; x++) {
+                        const base = data.tiles?.[y]?.[x] ?? 0;
+                        const decor = data.decorations?.[y]?.[x] ?? null;
+                        const isBlocked = data.blocked?.some(b => b.x === x && b.y === y) ?? false;
+                        tiles[y][x] = { base, decor, walkable: !isBlocked };
+                    }
+                }
+
+                collectibles = data.collectibles || [];
+                robotStart = data.robotStart || { x: 1, y: 1, direction: 1 };
+                goalPosition = data.goalPosition || null;
+                victoryCondition = data.victoryCondition || 'collectAll';
+
+                canvas.width = gridWidth * tileSize;
+                canvas.height = gridHeight * tileSize;
+
+                document.querySelectorAll('.victory-option input').forEach(inp => {
+                    inp.checked = inp.value === victoryCondition;
+                    inp.closest('.victory-option').classList.toggle('active', inp.checked);
+                });
+
+                // Count how many images need to load
+                let imagesToLoad = 0;
+                let imagesLoaded = 0;
+
+                function onImageLoaded() {
+                    imagesLoaded++;
+                    if (imagesLoaded >= imagesToLoad) {
+                        buildPalette();
+                        buildCollectiblesPalette();
+                        render();
+                        updateJSON();
+                        setStatus('Carregado!');
+                    }
+                }
+
+                // Load tileset config
+                if (data.tileset) {
+                    document.getElementById('tileset-path').value = data.tileset.path || TILESET_PATH;
+                    document.getElementById('tileset-cols').value = data.tileset.cols || 11;
+                    document.getElementById('tileset-rows').value = data.tileset.rows || 7;
+                    document.getElementById('tileset-tilesize').value = data.tileset.tileSize || 32;
+                    TILESET_COLS = data.tileset.cols || 11;
+                    TILESET_ROWS = data.tileset.rows || 7;
+                    TILE_SRC_SIZE = data.tileset.tileSize || 32;
+                    TILESET_PATH = data.tileset.path || TILESET_PATH;
+
+                    imagesToLoad++;
+                    tilesetImg.onload = onImageLoaded;
+                    tilesetImg.src = TILESET_PATH;
+                }
+
+                // Load collectibles sprite config
+                if (data.collectiblesSprite) {
+                    document.getElementById('collectibles-path').value = data.collectiblesSprite.path || COLLECT_PATH;
+                    document.getElementById('collectibles-cols').value = data.collectiblesSprite.cols || 3;
+                    document.getElementById('collectibles-rows').value = data.collectiblesSprite.rows || 1;
+                    document.getElementById('collectibles-size').value = data.collectiblesSprite.frameSize || 64;
+                    COLLECT_COLS = data.collectiblesSprite.cols || 3;
+                    COLLECT_ROWS = data.collectiblesSprite.rows || 1;
+                    COLLECT_SIZE = data.collectiblesSprite.frameSize || 64;
+                    COLLECT_PATH = data.collectiblesSprite.path || COLLECT_PATH;
+
+                    imagesToLoad++;
+                    collectiblesImg.onload = onImageLoaded;
+                    collectiblesImg.src = COLLECT_PATH;
+                }
+
+                // If no images to load, render immediately
+                if (imagesToLoad === 0) {
+                    buildPalette();
+                    buildCollectiblesPalette();
+                    render();
+                    updateJSON();
+                    setStatus('Carregado!');
+                } else {
+                    setStatus('Carregando imagens...');
+                }
+            } catch (e) {
+                alert('Erro: ' + e.message);
+            }
+        }
+
+        function setStatus(msg) {
+            document.getElementById('status').textContent = msg;
+        }
+
+        tilesetImg.onload = () => {
+            buildPalette();
+            initGrid();
+            canvas.width = gridWidth * tileSize;
+            canvas.height = gridHeight * tileSize;
+            render();
+            updateJSON();
+        };
+
+        collectiblesImg.onload = () => {
+            buildCollectiblesPalette();
+            render();
+        };
+
+        if (tilesetImg.complete) tilesetImg.onload();
+        if (collectiblesImg.complete) collectiblesImg.onload();
+    </script>
+</body>
+
+</html>

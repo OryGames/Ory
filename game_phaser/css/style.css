@@ -1,0 +1,143 @@
+/* =====================================
+   Ory: Contra Dengue - Stylesheet
+   =====================================*/
+
+/* Camera Overlay */
+#camera-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.camera-box {
+    background: linear-gradient(145deg, #1e2a24 0%, #152018 100%);
+    padding: 30px;
+    border-radius: 16px;
+    border: 2px solid #00d4bb;
+    text-align: center;
+    max-width: 95vw;
+    box-shadow: 0 0 30px rgba(0, 212, 187, 0.4);
+}
+
+.camera-box h2 {
+    margin: 0 0 5px 0;
+    color: #00d4bb;
+    font-size: 28px;
+}
+
+.camera-box .subtitle {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 480px;
+    height: 480px;
+    max-width: 80vw;
+    max-height: 80vw;
+    margin: 0 auto;
+    background: #000;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 3px solid #333;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    /* Mirror for natural feel */
+}
+
+/* Animated Scan Line */
+#scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00ff88, transparent);
+    box-shadow: 0 0 15px #00ff88;
+    animation: scan 2.5s linear infinite;
+    opacity: 0;
+}
+
+@keyframes scan {
+    0% {
+        top: 0%;
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* Buttons */
+.controls {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+button {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#btn-capture {
+    background: linear-gradient(135deg, #00d4bb, #00a896);
+    color: #000;
+}
+
+#btn-capture:hover {
+    background: linear-gradient(135deg, #00ffdf, #00d4bb);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 212, 187, 0.4);
+}
+
+#btn-close {
+    background: #444;
+    color: white;
+}
+
+#btn-close:hover {
+    background: #555;
+}
+
+#status-text {
+    margin-top: 15px;
+    color: #00d4bb;
+    font-size: 14px;
+    min-height: 20px;
+}
