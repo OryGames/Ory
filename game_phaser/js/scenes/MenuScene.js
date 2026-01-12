@@ -61,7 +61,8 @@ class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(100).setInteractive({ useHandCursor: true });
 
         this.backBtn.on('pointerdown', () => {
-            if (this.cache.audio.exists('select_sound')) {
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.cache.audio.exists('select_sound')) {
                 this.sound.play('select_sound', { volume: 0.5 });
             }
             this.scene.start('TitleScene');
@@ -91,7 +92,10 @@ class MenuScene extends Phaser.Scene {
         });
 
         if (!alreadyPlaying) {
-            this.sound.play('music_levelselect', { loop: true, volume: 0.2 });
+            const settings = this.loadSettings();
+            const music = this.sound.add('music_levelselect', { loop: true, volume: 0.2 });
+            music.setMute(!settings.musicEnabled);
+            music.play();
         }
 
         // Handle resize
@@ -181,7 +185,8 @@ class MenuScene extends Phaser.Scene {
             });
 
             hitArea.on('pointerdown', () => {
-                if (this.cache.audio.exists('select_sound')) {
+                const settings = this.loadSettings();
+                if (settings.soundEnabled && this.cache.audio.exists('select_sound')) {
                     this.sound.play('select_sound', { volume: 0.5 });
                 }
                 container.setScale(0.95);
@@ -274,6 +279,25 @@ class MenuScene extends Phaser.Scene {
     getStars(levelId) {
         const data = localStorage.getItem(`ory_level_${levelId}`);
         return data ? JSON.parse(data).stars : 0;
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 
     async startLevel(levelId) {

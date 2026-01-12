@@ -151,7 +151,8 @@ class Robot {
     }
 
     startMovementSound() {
-        if (this.scene.cache.audio.exists('mov_sound')) {
+        const settings = this.loadSettings();
+        if (settings.soundEnabled && this.scene.cache.audio.exists('mov_sound')) {
             if (!this.movSound) {
                 this.movSound = this.scene.sound.add('mov_sound', { loop: true, volume: 0.85 });
             }
@@ -159,6 +160,25 @@ class Robot {
                 this.movSound.play();
             }
         }
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 
     stopMovementSound() {

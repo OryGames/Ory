@@ -21,7 +21,8 @@ class Interpreter {
         console.log("Interpreter executing lines:", commandLines);
 
         // Play command sound once when starting to process commands
-        if (scene.sound && scene.cache.audio.exists('cmd_sound')) {
+        const settings = Interpreter.loadSettings();
+        if (settings.soundEnabled && scene.sound && scene.cache.audio.exists('cmd_sound')) {
             const cmdSound = scene.sound.get('cmd_sound') || scene.sound.add('cmd_sound', { loop: false, volume: 0.8 });
             cmdSound.play();
         }
@@ -161,5 +162,24 @@ class Interpreter {
 
     static delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    static loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }
