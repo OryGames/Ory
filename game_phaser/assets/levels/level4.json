@@ -44,7 +44,7 @@
       "Sem água parada, sem mosquito da dengue!",
       "Parabéns! Você é um herói contra a dengue!"
     ],
-    "duration": 6000,
+    "duration": 4000,
     "music": "./assets/audio/music/cutscenes.mp3"
   },
   "__outroCutscene": {

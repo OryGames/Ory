@@ -124,7 +124,9 @@ class TitleScene extends Phaser.Scene {
         this.optHitArea.on('pointerup', () => {
             this.cameras.main.fadeOut(300, 0, 0, 0);
             this.time.delayedCall(300, () => {
-                this.scene.start('OptionsScene');
+                // Sleep this scene and launch OptionsScene to preserve music
+                this.scene.sleep();
+                this.scene.launch('OptionsScene');
             });
         });
 
@@ -156,8 +158,14 @@ class TitleScene extends Phaser.Scene {
             music.play();
         }
 
-        // Handle resize
+        // Handle resize (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
         this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
 
         // Display version in bottom right corner
         const version = this.game.config.gameVersion || 'v1.0';
@@ -237,13 +245,15 @@ class TitleScene extends Phaser.Scene {
 
         // Position and scale backgrounds to cover screen
         const activeBg = isPortrait ? this.bgPortrait : this.bgLandscape;
-        activeBg.setPosition(width / 2, height / 2);
 
         // Scale to cover (crop edges, don't stretch)
         const scaleX = width / activeBg.width;
         const scaleY = height / activeBg.height;
         const scale = Math.max(scaleX, scaleY);
         activeBg.setScale(scale);
+
+        activeBg.setOrigin(0.5, 0);
+        activeBg.setPosition(width / 2, 0);
 
         // Also scale the hidden one for smooth transitions
         const hiddenBg = isPortrait ? this.bgLandscape : this.bgPortrait;
@@ -301,6 +311,7 @@ class TitleScene extends Phaser.Scene {
     }
 
     handleResize(gameSize) {
+        // Update layout without restarting to preserve state
         this.updateLayout();
     }
 }

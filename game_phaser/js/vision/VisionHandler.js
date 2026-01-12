@@ -5,7 +5,8 @@ class VisionHandler {
         this.videoElements = {
             video: document.getElementById('webcam'),
             overlay: document.getElementById('camera-overlay'),
-            status: document.getElementById('status-text')
+            status: document.getElementById('status-text'),
+            canvas: document.getElementById('detection-canvas')
         };
 
         this.isDetecting = false;
@@ -72,8 +73,16 @@ class VisionHandler {
             // Mirror only for front camera (desktop) - back camera (mobile) should not be mirrored
             if (!isMobile) {
                 this.videoElements.video.style.transform = 'scaleX(-1)';
+                if (this.videoElements.canvas) this.videoElements.canvas.style.transform = 'scaleX(-1)';
             } else {
                 this.videoElements.video.style.transform = 'none';
+                if (this.videoElements.canvas) this.videoElements.canvas.style.transform = 'none';
+            }
+
+            // Set canvas size to match model input for easier drawing
+            if (this.videoElements.canvas) {
+                this.videoElements.canvas.width = 640;
+                this.videoElements.canvas.height = 640;
             }
 
             return new Promise(resolve => {
@@ -125,6 +134,8 @@ class VisionHandler {
                     this.videoElements.status.innerText = "Nenhum bloco detectado...";
                 }
             }
+
+            this.drawDetections(boxes);
         } catch (e) {
             console.error(e);
         }
@@ -243,6 +254,29 @@ class VisionHandler {
         });
 
         console.log("Parsed Commands (by line):", commands);
+        console.log("Parsed Commands (by line):", commands);
         return commands;
+    }
+
+    drawDetections(boxes) {
+        if (!this.videoElements.canvas) return;
+
+        const ctx = this.videoElements.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.videoElements.canvas.width, this.videoElements.canvas.height);
+
+        // Style for detections
+        ctx.strokeStyle = '#00ff88';
+        ctx.lineWidth = 4;
+        ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+
+        boxes.forEach(box => {
+            ctx.beginPath();
+            // Draw circle at center of box
+            // Coords are already in 640x640 space (from model output processing)
+            const radius = (Math.min(box.w, box.h) / 2) * 0.5;
+            ctx.arc(box.x, box.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.fill();
+        });
     }
 }

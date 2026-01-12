@@ -132,8 +132,14 @@ class LevelCompleteScene extends Phaser.Scene {
             }
         }
 
-        // Handle resize
+        // Handle resize (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
         this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
     }
 
     playCutscene() {

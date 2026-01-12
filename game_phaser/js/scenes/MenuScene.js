@@ -98,8 +98,14 @@ class MenuScene extends Phaser.Scene {
             music.play();
         }
 
-        // Handle resize
+        // Handle resize (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
         this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
     }
 
     createLevelNode(level, index) {
@@ -265,6 +271,7 @@ class MenuScene extends Phaser.Scene {
     }
 
     handleResize(gameSize) {
+        // Update layout without restarting to preserve state
         this.updateLayout();
     }
 

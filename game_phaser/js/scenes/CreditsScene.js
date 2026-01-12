@@ -26,7 +26,7 @@ class CreditsScene extends Phaser.Scene {
         }
 
         // Background
-        this.add.rectangle(width / 2, height / 2, width, height, 0x0a1628);
+        this.bgRect = this.add.rectangle(width / 2, height / 2, width, height, 0x0a1628);
 
         // Stars/particles background effect
         for (let i = 0; i < 50; i++) {
@@ -205,7 +205,7 @@ class CreditsScene extends Phaser.Scene {
 
         // Scroll credits up
         const totalHeight = yPos;
-        const scrollDuration = 60000; // 60 seconds to scroll
+        const scrollDuration = 40000; // 40 seconds to scroll
 
         this.tweens.add({
             targets: this.creditsContainer,
@@ -223,13 +223,19 @@ class CreditsScene extends Phaser.Scene {
         });
 
         // Skip text
-        this.add.text(width / 2, height - 30, '👆 Toque para pular', {
+        this.skipText = this.add.text(width / 2, height - 30, '👆 Toque para pular', {
             fontSize: '14px',
             color: '#666666'
         }).setOrigin(0.5).setDepth(100);
 
-        // Handle resize
+        // Handle resize (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
         this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
     }
 
     showEndScreen() {
@@ -280,13 +286,13 @@ class CreditsScene extends Phaser.Scene {
         this.bgVideo.setAlpha(0.6); // Slightly dimmed video
 
         // Dark overlay (lighter)
-        this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.3).setDepth(1);
+        this.endOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.3).setDepth(1);
 
-        this.add.text(width / 2, height * 0.3, '🏆', {
+        this.trophyText = this.add.text(width / 2, height * 0.3, '🏆', {
             fontSize: '80px'
         }).setOrigin(0.5).setDepth(2);
 
-        this.add.text(width / 2, height * 0.5, 'FIM DE JOGO', {
+        this.gameOverText = this.add.text(width / 2, height * 0.5, 'FIM DE JOGO', {
             fontSize: '40px',
             fontFamily: 'Arial Black, Arial, sans-serif',
             color: '#00ffcc',
@@ -294,13 +300,13 @@ class CreditsScene extends Phaser.Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setDepth(2);
 
-        this.add.text(width / 2, height * 0.6, 'Obrigado por jogar!', {
+        this.thanksText = this.add.text(width / 2, height * 0.6, 'Obrigado por jogar!', {
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5).setDepth(2);
 
         // Tap to continue hint
-        this.add.text(width / 2, height * 0.8, '👆 Toque para voltar ao início', {
+        this.endHintText = this.add.text(width / 2, height * 0.8, '👆 Toque para voltar ao início', {
             fontSize: '16px',
             color: '#aaaaaa'
         }).setOrigin(0.5).setDepth(2);
@@ -314,8 +320,54 @@ class CreditsScene extends Phaser.Scene {
     }
 
     handleResize(gameSize) {
-        // Restart scene on resize for proper layout
-        this.scene.restart();
+        this.updateLayout();
+    }
+
+    updateLayout() {
+        const { width, height } = this.scale;
+
+        // Resize background
+        if (this.bgRect && this.bgRect.active) {
+            this.bgRect.setSize(width, height);
+            this.bgRect.setPosition(width / 2, height / 2);
+        }
+
+        // Resize scrolling credits
+        if (this.creditsContainer && this.creditsContainer.active && this.creditsContainer.visible) {
+            this.creditsContainer.x = width / 2;
+            // Note: y is controlled by tween, we don't mess with it
+        }
+
+        // Resize skip text
+        if (this.skipText && this.skipText.active) {
+            this.skipText.setPosition(width / 2, height - 30);
+        }
+
+        // Resize End Screen elements
+        if (this.bgVideo && this.bgVideo.active) {
+            this.bgVideo.setPosition(width / 2, height / 2);
+
+            // Maintain aspect ratio cover
+            const videoWidth = this.bgVideo.width || this.bgVideo.displayWidth;
+            const videoHeight = this.bgVideo.height || this.bgVideo.displayHeight;
+            if (videoWidth > 0 && videoHeight > 0) {
+                const aspectRatio = videoHeight / videoWidth;
+                const scaleX = width / videoWidth;
+                const scaleY = height / videoHeight;
+                const scale = Math.max(scaleX, scaleY);
+                this.bgVideo.setScale(scale);
+            }
+        }
+
+        if (this.endOverlay && this.endOverlay.active) {
+            this.endOverlay.setSize(width, height);
+            this.endOverlay.setPosition(width / 2, height / 2);
+        }
+
+        if (this.trophyText && this.trophyText.active) this.trophyText.setPosition(width / 2, height * 0.3);
+        if (this.gameOverText && this.gameOverText.active) this.gameOverText.setPosition(width / 2, height * 0.5);
+        if (this.thanksText && this.thanksText.active) this.thanksText.setPosition(width / 2, height * 0.6);
+        if (this.endHintText && this.endHintText.active) this.endHintText.setPosition(width / 2, height * 0.8);
     }
 
     loadSettings() {

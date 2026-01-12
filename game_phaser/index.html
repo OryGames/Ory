@@ -87,17 +87,23 @@
     <!-- Camera Overlay (Managed by CSS/JS) -->
     <div id="camera-overlay" class="hidden">
         <div class="camera-box">
-            <h2>📷 Escanear Código</h2>
-            <p class="subtitle">Mostre os blocos para a câmera</p>
             <div class="video-wrapper">
                 <video id="webcam" autoplay playsinline muted></video>
+                <canvas id="detection-canvas"></canvas>
                 <div id="scan-line"></div>
             </div>
-            <div class="controls">
-                <button id="btn-capture">✅ Capturar</button>
-                <button id="btn-close">❌ Fechar</button>
+
+            <div class="camera-info">
+                <h2>📷 Escanear Código</h2>
+                <p class="subtitle">Mostre os blocos para a câmera</p>
+
+                <div class="controls">
+                    <button id="btn-capture">✅ Capturar</button>
+                    <button id="btn-close">❌ Fechar</button>
+                </div>
+
+                <div id="status-text">Carregando modelo de IA...</div>
             </div>
-            <div id="status-text">Carregando modelo de IA...</div>
         </div>
     </div>
 
