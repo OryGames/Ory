@@ -158,6 +158,49 @@ class TitleScene extends Phaser.Scene {
 
         // Handle resize
         this.scale.on('resize', this.handleResize, this);
+
+        // Display version in bottom right corner
+        const version = this.game.config.gameVersion || 'v1.0';
+        this.versionText = this.add.text(width - 10, height - 10, version, {
+            fontSize: '12px',
+            fontFamily: 'Arial, sans-serif',
+            color: '#ffffff66'
+        }).setOrigin(1, 1).setDepth(50);
+
+        // Show version warning if alpha or beta
+        this.showVersionWarning();
+    }
+
+    showVersionWarning() {
+        const version = this.game.config.gameVersion || '';
+        const isTestVersion = version.toLowerCase().includes('alpha') || version.toLowerCase().includes('beta');
+
+        if (isTestVersion) {
+            const { width } = this.scale;
+
+            // Warning banner background
+            this.warningBg = this.add.graphics();
+            this.warningBg.fillStyle(0xff6b00, 0.95);
+            this.warningBg.fillRoundedRect(10, 70, width - 20, 50, 10);
+            this.warningBg.lineStyle(2, 0xffcc00, 1);
+            this.warningBg.strokeRoundedRect(10, 70, width - 20, 50, 10);
+            this.warningBg.setDepth(200);
+
+            // Warning text
+            this.warningText = this.add.text(width / 2, 95, `⚠️ VERSÃO DE TESTES (${version})`, {
+                fontSize: '14px',
+                fontFamily: 'Arial, sans-serif',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5).setDepth(201);
+
+            // Subtext
+            this.warningSubtext = this.add.text(width / 2, 110, 'Esta versão pode conter bugs e está em desenvolvimento', {
+                fontSize: '10px',
+                fontFamily: 'Arial, sans-serif',
+                color: '#ffffffcc'
+            }).setOrigin(0.5).setDepth(201);
+        }
     }
 
     drawButton(color = 0xf5a623) {

@@ -24,7 +24,8 @@ const config = {
     scene: [PreloaderScene, SplashScene, InfoScene, TitleScene, OptionsScene, MenuScene, CutsceneScene, LevelScene, LevelCompleteScene, CreditsScene, UIScene],
     input: {
         activePointers: 3
-    }
+    },
+    version: 'alpha-0.1'
 };
 
 // Initialize Game
