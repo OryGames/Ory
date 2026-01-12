@@ -167,7 +167,7 @@ class TitleScene extends Phaser.Scene {
             color: '#ffffff66'
         }).setOrigin(1, 1).setDepth(50);
 
-        // Show version warning if alpha or beta
+        // Show version warning if alpha or beta //
         this.showVersionWarning();
     }
 
