@@ -1,15 +1,19 @@
 /**
  * Ory: Caça Dengue - Robot Coding Adventure
- * Main Game Configuration
+ * Main Game Configuration (Full Screen Responsive)
  */
 
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 640,
     parent: 'game-container',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1a1a2e',
     pixelArt: true,
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: '100%',
+        height: '100%'
+    },
     physics: {
         default: 'arcade',
         arcade: {
@@ -17,7 +21,10 @@ const config = {
             debug: false
         }
     },
-    scene: [MenuScene, LevelScene, LevelCompleteScene, UIScene]
+    scene: [PreloaderScene, SplashScene, InfoScene, TitleScene, MenuScene, CutsceneScene, LevelScene, LevelCompleteScene, CreditsScene, UIScene],
+    input: {
+        activePointers: 3
+    }
 };
 
 // Initialize Game

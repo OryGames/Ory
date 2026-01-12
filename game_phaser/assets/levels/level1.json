@@ -1,6 +1,7 @@
 {
-    "id": 4,
-    "name": "Teste",
+    "id": 1,
+    "name": "O quintal",
+    "music": "./assets/audio/music/Ory_inlevel1.mp3",
     "gridWidth": 12,
     "gridHeight": 10,
     "tileSize": 64,
@@ -16,7 +17,7 @@
         "rows": 3,
         "frameSize": 340
     },
-    "character": "bluebot",
+    "character": "boxbot",
     "robotStart": {
         "x": 2,
         "y": 2,

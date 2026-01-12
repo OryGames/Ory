@@ -20,6 +20,12 @@ class Interpreter {
     static async execute(commandLines, robot, scene) {
         console.log("Interpreter executing lines:", commandLines);
 
+        // Play command sound once when starting to process commands
+        if (scene.sound && scene.cache.audio.exists('cmd_sound')) {
+            const cmdSound = scene.sound.get('cmd_sound') || scene.sound.add('cmd_sound', { loop: false, volume: 0.8 });
+            cmdSound.play();
+        }
+
         // First, find loop structures
         const { commands, loops } = Interpreter.parseLoops(commandLines);
 

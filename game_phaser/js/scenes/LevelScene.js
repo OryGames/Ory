@@ -84,6 +84,11 @@ class LevelScene extends Phaser.Scene {
         this.load.image('player_right', charPath + 'player_right.png');
         this.load.image('player_right_1', charPath + 'player_right_1.png');
 
+        // Load movement audio
+        this.load.audio('cmd_sound', './assets/audio/movement/cmd.mp3');
+        this.load.audio('mov_sound', './assets/audio/movement/mov1.mp3');
+        this.load.audio('get_sound', './assets/audio/movement/get.mp3');
+
         // Start loading and call setup when done
         this.load.once('complete', () => this.setupLevel());
         this.load.start();
@@ -137,6 +142,14 @@ class LevelScene extends Phaser.Scene {
         this.cameras.main.startFollow(this.robot.sprite, true, 1, 1);
         this.cameras.main.centerOn(this.robot.sprite.x, this.robot.sprite.y);
 
+        // Apply zoom for high-resolution desktops (>1280px width)
+        const screenWidth = this.scale.width;
+        if (screenWidth > 1280) {
+            // Scale from 1.2x at 1280px to 1.5x at 1920px+
+            const zoomFactor = Math.min(2.0, 1.5 + (screenWidth - 1280) / (1920 - 1280) * 0.3);
+            this.cameras.main.setZoom(zoomFactor);
+        }
+
         // UI
         this.scene.launch('UIScene');
         this.time.delayedCall(100, () => {
@@ -145,6 +158,22 @@ class LevelScene extends Phaser.Scene {
                 uiScene.updateLevelInfo(this.levelData.name, this.levelData.collectibles.length);
             }
         });
+
+        // Stop all background music when entering level
+        this.sound.stopByKey('music_title');
+        this.sound.stopByKey('music_levelselect');
+        this.sound.stopByKey('music_cutscene');
+        this.sound.stopByKey('music_level');
+
+        // Play level-specific music if defined in level JSON
+        // Example: "music": "./assets/audio/music/level1_theme.mp3"
+        if (this.levelData.music) {
+            this.load.audio('music_level', this.levelData.music);
+            this.load.once('complete', () => {
+                this.sound.play('music_level', { loop: true, volume: 0.2 });
+            });
+            this.load.start();
+        }
 
         this.startTime = Date.now();
     }
@@ -244,6 +273,12 @@ class LevelScene extends Phaser.Scene {
             item.collected = true;
             this.collected++;
 
+            // Play collect sound
+            if (this.cache.audio.exists('get_sound')) {
+                const getSound = this.sound.get('get_sound') || this.sound.add('get_sound', { volume: 0.85 });
+                getSound.play();
+            }
+
             this.tweens.add({
                 targets: item,
                 scale: 1.5,
@@ -295,6 +330,9 @@ class LevelScene extends Phaser.Scene {
         const timeUsed = Math.floor((Date.now() - this.startTime) / 1000);
         const stars = this.calculateStars(timeUsed, this.attempts);
 
+        // Stop level music
+        this.sound.stopByKey('music_level');
+
         this.scene.stop('UIScene');
 
         this.scene.start('LevelCompleteScene', {
@@ -303,7 +341,10 @@ class LevelScene extends Phaser.Scene {
             timeUsed: timeUsed,
             attempts: this.attempts,
             collected: this.collected,
-            total: this.levelData.collectibles.length
+            total: this.levelData.collectibles.length,
+            victory: true,
+            outroCutscene: this.levelData.outroCutscene || null,
+            isLastLevel: this.levelData.isLastLevel || false
         });
     }
 

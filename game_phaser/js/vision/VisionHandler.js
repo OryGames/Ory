@@ -22,6 +22,17 @@ class VisionHandler {
 
     async loadModel() {
         try {
+            // Check if model was preloaded by PreloaderScene
+            if (window.preloadedAIModel) {
+                console.log("Vision: Using preloaded YOLO model");
+                this.model = window.preloadedAIModel;
+                if (this.videoElements.status) {
+                    this.videoElements.status.innerText = "IA pronta! Alinhe os blocos.";
+                }
+                return;
+            }
+
+            // Fallback: load model if not preloaded
             console.log("Vision: Loading YOLO...");
             if (this.videoElements.status) {
                 this.videoElements.status.innerText = "Carregando IA...";

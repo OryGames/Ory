@@ -9,17 +9,23 @@ class UIScene extends Phaser.Scene {
             this.vision = new VisionHandler(this);
         }
 
+        // Load select sound if not already loaded
+        if (!this.cache.audio.exists('select_sound')) {
+            this.load.audio('select_sound', './assets/audio/select.mp3');
+            this.load.start();
+        }
+
         // HUD Background - top bar
         this.hudBg = this.add.rectangle(0, 0, 350, 50, 0x000000, 0.85);
         this.hudBg.setOrigin(0, 0);
-        this.hudBg.setStrokeStyle(2, 0x00d4bb);
+        this.hudBg.setStrokeStyle(2, 0xf5a623);
         this.hudBg.setScrollFactor(0);
         this.hudBg.setDepth(1000);
 
         // Level Name
         this.levelNameText = this.add.text(10, 8, '🦟 Carregando...', {
             fontSize: '14px',
-            color: '#00d4bb',
+            color: '#f5a623',
             fontStyle: 'bold'
         }).setScrollFactor(0).setDepth(1001);
 
@@ -39,6 +45,9 @@ class UIScene extends Phaser.Scene {
             .setScrollFactor(0).setDepth(1001);
 
         this.menuBtn.on('pointerdown', () => {
+            if (this.cache.audio.exists('select_sound')) {
+                this.sound.play('select_sound', { volume: 0.5 });
+            }
             this.scene.stop('LevelScene');
             this.scene.stop('UIScene');
             this.scene.start('MenuScene');
