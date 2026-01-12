@@ -7,7 +7,14 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a3a2f">
+    <meta name="theme-color" content="#f5a623">
+    <meta name="description" content="Jogo educativo de programação visual para combater a dengue!">
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <title>Ory: Contra Dengue 🦟</title>
     <link rel="stylesheet" href="css/style.css">
 
@@ -110,6 +117,21 @@
     <script src="js/scenes/LevelCompleteScene.js"></script>
     <script src="js/scenes/UIScene.js"></script>
     <script src="js/game.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 
 </body>
 
