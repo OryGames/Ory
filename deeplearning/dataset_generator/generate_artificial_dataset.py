@@ -136,6 +136,20 @@ def generate_img_blocks(blocks,backGroundImageFile,OutputImageFile,OutputYoloFil
     base_image = Image.open(backGroundImageFile).convert("RGBA")
     width, height = base_image.size
     
+    # Redimensionar BG se altura > 1024, mantendo proporção
+    if height > 1024:
+        new_height = 1024
+        new_width = int(width * (new_height / height))
+        base_image = base_image.resize((new_width, new_height), Image.LANCZOS)
+        width, height = base_image.size
+
+    # Redimensionar BG se altura for menor que 1000
+    if height < 1000:
+        new_height = 1000
+        new_width = int(width * (new_height / height))
+        base_image = base_image.resize((new_width, new_height), Image.LANCZOS)
+        width, height = base_image.size
+    
     # Create the transparent layer for blocks
     blocks_layer = Image.new('RGBA', (width, height), (0,0,0,0))
     
@@ -383,7 +397,7 @@ if __name__ == '__main__':
     dirimg="./bg/"
     dirsets="./sets/"
     diroutput="../yolo_model/data/obj/"
-    loops=20
+    loops=1000
     
     available_block_dirs = ['img_blocks'] + [f'img_blocks_p{i}' for i in range(1, 9)]
 
