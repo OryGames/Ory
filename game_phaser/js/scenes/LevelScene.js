@@ -139,7 +139,7 @@ class LevelScene extends Phaser.Scene {
         });
 
         // Camera - always keep robot centered (no bounds = can center freely)
-        this.cameras.main.startFollow(this.robot.sprite, true, 1, 1);
+        this.cameras.main.startFollow(this.robot.sprite, true, 0.1, 0.1);
         this.cameras.main.centerOn(this.robot.sprite.x, this.robot.sprite.y);
 
         // Apply zoom for high-resolution desktops (>1280px width)
@@ -149,6 +149,9 @@ class LevelScene extends Phaser.Scene {
             const zoomFactor = Math.min(2.0, 1.5 + (screenWidth - 1280) / (1920 - 1280) * 0.3);
             this.cameras.main.setZoom(zoomFactor);
         }
+
+        // Drag-to-pan camera feature
+        this.setupCameraDrag();
 
         // UI
         this.scene.launch('UIScene');
@@ -170,12 +173,76 @@ class LevelScene extends Phaser.Scene {
         if (this.levelData.music) {
             this.load.audio('music_level', this.levelData.music);
             this.load.once('complete', () => {
-                this.sound.play('music_level', { loop: true, volume: 0.2 });
+                const music = this.sound.add('music_level', { loop: true, volume: 0.2 });
+                // Apply music setting
+                const settings = this.loadSettings();
+                music.setMute(!settings.musicEnabled);
+                music.play();
             });
             this.load.start();
         }
 
+        // Draw grid overlay if enabled
+        this.drawGridOverlay();
+
         this.startTime = Date.now();
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
+    }
+
+    drawGridOverlay() {
+        const settings = this.loadSettings();
+        if (!settings.gridEnabled) return;
+
+        const gridWidth = this.levelData.gridWidth;
+        const gridHeight = this.levelData.gridHeight;
+
+        const graphics = this.add.graphics();
+        graphics.lineStyle(1, 0xffffff, 0.25);
+        graphics.setDepth(100);
+
+        // Vertical lines
+        for (let x = 0; x <= gridWidth; x++) {
+            graphics.moveTo(x * this.tileSize, 0);
+            graphics.lineTo(x * this.tileSize, gridHeight * this.tileSize);
+        }
+
+        // Horizontal lines
+        for (let y = 0; y <= gridHeight; y++) {
+            graphics.moveTo(0, y * this.tileSize);
+            graphics.lineTo(gridWidth * this.tileSize, y * this.tileSize);
+        }
+
+        graphics.strokePath();
+
+        // Optional: Add coordinate labels at grid intersections
+        for (let x = 0; x < gridWidth; x++) {
+            for (let y = 0; y < gridHeight; y++) {
+                this.add.text(
+                    x * this.tileSize + 4,
+                    y * this.tileSize + 2,
+                    `${x},${y}`,
+                    { fontSize: '8px', color: '#ffffff', alpha: 0.3 }
+                ).setDepth(101).setAlpha(0.4);
+            }
+        }
     }
 
     update() {
@@ -274,7 +341,8 @@ class LevelScene extends Phaser.Scene {
             this.collected++;
 
             // Play collect sound
-            if (this.cache.audio.exists('get_sound')) {
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.cache.audio.exists('get_sound')) {
                 const getSound = this.sound.get('get_sound') || this.sound.add('get_sound', { volume: 0.85 });
                 getSound.play();
             }
@@ -354,5 +422,64 @@ class LevelScene extends Phaser.Scene {
         if (time <= sc.time[1] && attempts <= sc.attempts[1]) return 2;
         if (time <= sc.time[0] && attempts <= sc.attempts[0]) return 1;
         return 0;
+    }
+
+    setupCameraDrag() {
+        this.isDraggingCamera = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.cameraStartX = 0;
+        this.cameraStartY = 0;
+
+        // Create invisible drag zone covering the whole world
+        const worldWidth = this.levelData.gridWidth * this.tileSize;
+        const worldHeight = this.levelData.gridHeight * this.tileSize;
+
+        this.input.on('pointerdown', (pointer) => {
+            // Don't start drag if clicking on robot (let robot click through)
+            const robotBounds = this.robot.sprite.getBounds();
+            if (robotBounds.contains(pointer.worldX, pointer.worldY)) {
+                return;
+            }
+
+            this.isDraggingCamera = true;
+            this.dragStartX = pointer.x;
+            this.dragStartY = pointer.y;
+            this.cameraStartX = this.cameras.main.scrollX;
+            this.cameraStartY = this.cameras.main.scrollY;
+
+            // Stop following robot while dragging
+            this.cameras.main.stopFollow();
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (!this.isDraggingCamera) return;
+
+            const zoom = this.cameras.main.zoom;
+            const deltaX = (this.dragStartX - pointer.x) / zoom;
+            const deltaY = (this.dragStartY - pointer.y) / zoom;
+
+            this.cameras.main.scrollX = this.cameraStartX + deltaX;
+            this.cameras.main.scrollY = this.cameraStartY + deltaY;
+        });
+
+        this.input.on('pointerup', () => {
+            if (!this.isDraggingCamera) return;
+
+            this.isDraggingCamera = false;
+
+            // Smoothly return camera to follow robot
+            this.tweens.add({
+                targets: this.cameras.main,
+                scrollX: this.robot.sprite.x - this.cameras.main.width / 2,
+                scrollY: this.robot.sprite.y - this.cameras.main.height / 2,
+                duration: 400,
+                ease: 'Sine.easeOut',
+                onComplete: () => {
+                    // Resume following robot
+                    this.cameras.main.startFollow(this.robot.sprite, true, 0.1, 0.1);
+                }
+            });
+        });
     }
 }

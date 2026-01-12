@@ -15,37 +15,95 @@ class UIScene extends Phaser.Scene {
             this.load.start();
         }
 
-        // HUD Background - top bar
-        this.hudBg = this.add.rectangle(0, 0, 350, 50, 0x000000, 0.85);
-        this.hudBg.setOrigin(0, 0);
-        this.hudBg.setStrokeStyle(2, 0xf5a623);
+        const hudWidth = 320;
+        const hudHeight = 54;
+        const hudX = 12;
+        const hudY = 10;
+        const cornerRadius = 14;
+
+        // HUD Background - elegant rounded container with glassmorphism
+        this.hudBg = this.add.graphics();
+        this.hudBg.fillStyle(0x1a1a2e, 0.9);
+        this.hudBg.fillRoundedRect(hudX, hudY, hudWidth, hudHeight, cornerRadius);
+        this.hudBg.lineStyle(2, 0xf5a623, 0.8);
+        this.hudBg.strokeRoundedRect(hudX, hudY, hudWidth, hudHeight, cornerRadius);
         this.hudBg.setScrollFactor(0);
         this.hudBg.setDepth(1000);
 
+        // Inner glow effect
+        this.hudGlow = this.add.graphics();
+        this.hudGlow.lineStyle(1, 0xf5a623, 0.3);
+        this.hudGlow.strokeRoundedRect(hudX + 2, hudY + 2, hudWidth - 4, hudHeight - 4, cornerRadius - 2);
+        this.hudGlow.setScrollFactor(0);
+        this.hudGlow.setDepth(1000);
+
         // Level Name
-        this.levelNameText = this.add.text(10, 8, '🦟 Carregando...', {
+        this.levelNameText = this.add.text(hudX + 14, hudY + 10, '🦟 Carregando...', {
             fontSize: '14px',
             color: '#f5a623',
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            fontFamily: 'Arial, sans-serif'
         }).setScrollFactor(0).setDepth(1001);
 
-        // Stats Row
-        this.statsText = this.add.text(10, 28, '⏱️ 0s  |  🔄 0  |  🗑️ 0/0', {
+        // Stats Row with better styling
+        this.statsText = this.add.text(hudX + 14, hudY + 30, '⏱️ 0s  |  🔄 0  |  🗑️ 0/0', {
             fontSize: '12px',
-            color: '#fff'
+            color: '#e0e0e0',
+            fontFamily: 'Arial, sans-serif'
         }).setScrollFactor(0).setDepth(1001);
 
-        // Menu Button (top right)
-        this.menuBtn = this.add.text(this.cameras.main.width - 10, 15, '☰ Menu', {
-            fontSize: '14px',
-            color: '#fff',
-            backgroundColor: '#ff6b6b',
-            padding: { x: 10, y: 6 }
-        }).setOrigin(1, 0).setInteractive({ useHandCursor: true })
-            .setScrollFactor(0).setDepth(1001);
+        // Exit Button (top right) - elegant rounded design
+        const btnWidth = 80;
+        const btnHeight = 36;
+        const btnX = this.cameras.main.width - btnWidth - 12;
+        const btnY = hudY + (hudHeight - btnHeight) / 2;
+        const btnRadius = 10;
 
-        this.menuBtn.on('pointerdown', () => {
-            if (this.cache.audio.exists('select_sound')) {
+        // Button background
+        this.exitBtnBg = this.add.graphics();
+        this.exitBtnBg.fillStyle(0x2d1f3d, 0.95);
+        this.exitBtnBg.fillRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+        this.exitBtnBg.lineStyle(2, 0xf5a623, 0.9);
+        this.exitBtnBg.strokeRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+        this.exitBtnBg.setScrollFactor(0);
+        this.exitBtnBg.setDepth(1000);
+
+        // Button text
+        this.menuBtn = this.add.text(btnX + btnWidth / 2, btnY + btnHeight / 2, '← Sair', {
+            fontSize: '14px',
+            color: '#f5a623',
+            fontStyle: 'bold',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+        // Interactive zone for the button
+        this.exitBtnZone = this.add.zone(btnX + btnWidth / 2, btnY + btnHeight / 2, btnWidth, btnHeight)
+            .setInteractive({ useHandCursor: true })
+            .setScrollFactor(0)
+            .setDepth(1002);
+
+        // Hover effects
+        this.exitBtnZone.on('pointerover', () => {
+            this.exitBtnBg.clear();
+            this.exitBtnBg.fillStyle(0x3d2f4d, 0.98);
+            this.exitBtnBg.fillRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+            this.exitBtnBg.lineStyle(2, 0xffc857, 1);
+            this.exitBtnBg.strokeRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+            this.menuBtn.setColor('#ffc857');
+        });
+
+        this.exitBtnZone.on('pointerout', () => {
+            this.exitBtnBg.clear();
+            this.exitBtnBg.fillStyle(0x2d1f3d, 0.95);
+            this.exitBtnBg.fillRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+            this.exitBtnBg.lineStyle(2, 0xf5a623, 0.9);
+            this.exitBtnBg.strokeRoundedRect(btnX, btnY, btnWidth, btnHeight, btnRadius);
+            this.menuBtn.setColor('#f5a623');
+        });
+
+        this.exitBtnZone.on('pointerdown', () => {
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.cache.audio.exists('select_sound')) {
                 this.sound.play('select_sound', { volume: 0.5 });
             }
             this.scene.stop('LevelScene');
@@ -53,16 +111,34 @@ class UIScene extends Phaser.Scene {
             this.scene.start('MenuScene');
         });
 
-        // Instructions (bottom)
+        // Instructions (bottom) - elegant rounded pill
+        const instrBg = this.add.graphics();
+        const instrText = '👆 Clique no robô para programar';
+        const instrPadX = 16;
+        const instrPadY = 8;
+
         this.instructionText = this.add.text(
             this.cameras.main.width / 2,
-            this.cameras.main.height - 12,
-            '👆 Clique no robô para programar', {
+            this.cameras.main.height - 20,
+            instrText, {
             fontSize: '13px',
-            color: '#aaa',
-            backgroundColor: '#00000099',
-            padding: { x: 10, y: 4 }
+            color: '#e0e0e0',
+            fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(1001);
+
+        const instrWidth = this.instructionText.width + instrPadX * 2;
+        const instrHeight = this.instructionText.height + instrPadY * 2;
+        const instrX = (this.cameras.main.width - instrWidth) / 2;
+        const instrY = this.cameras.main.height - 20 - instrHeight / 2;
+
+        instrBg.fillStyle(0x1a1a2e, 0.85);
+        instrBg.fillRoundedRect(instrX, instrY, instrWidth, instrHeight, 12);
+        instrBg.lineStyle(1, 0xf5a623, 0.5);
+        instrBg.strokeRoundedRect(instrX, instrY, instrWidth, instrHeight, 12);
+        instrBg.setScrollFactor(0);
+        instrBg.setDepth(1000);
+
+        this.instructionBg = instrBg;
 
         // Setup camera overlay handlers
         this.setupCameraHandlers();
@@ -118,5 +194,24 @@ class UIScene extends Phaser.Scene {
 
     updateHUD(time, attempts, collected, total) {
         this.statsText.setText(`⏱️ ${time}s  |  🔄 ${attempts}  |  🗑️ ${collected}/${total}`);
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }

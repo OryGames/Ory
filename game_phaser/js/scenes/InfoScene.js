@@ -44,7 +44,8 @@ class InfoScene extends Phaser.Scene {
         // Click anywhere to continue
         this.input.on('pointerdown', () => {
             // Play select sound if available
-            if (this.cache.audio.exists('select_sound')) {
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.cache.audio.exists('select_sound')) {
                 this.sound.play('select_sound', { volume: 0.5 });
             }
 
@@ -71,5 +72,24 @@ class InfoScene extends Phaser.Scene {
         if (this.continueText) {
             this.continueText.setPosition(width / 2, height - 40);
         }
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }

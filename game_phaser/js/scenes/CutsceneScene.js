@@ -48,15 +48,20 @@ class CutsceneScene extends Phaser.Scene {
         // Play cutscene-specific music if defined in cutscene data
         // Example in level JSON: "introCutscene": { "type": "video", "path": "...", "music": "./assets/audio/music/custom.mp3" }
         if (this.cutsceneData.music) {
+            const settings = this.loadSettings();
             if (!this.cache.audio.exists('music_cutscene')) {
                 // Load and play after loaded
                 this.load.audio('music_cutscene', this.cutsceneData.music);
                 this.load.once('complete', () => {
-                    this.sound.play('music_cutscene', { loop: true, volume: 0.4 });
+                    const music = this.sound.add('music_cutscene', { loop: true, volume: 0.4 });
+                    music.setMute(!settings.musicEnabled);
+                    music.play();
                 });
                 this.load.start();
             } else {
-                this.sound.play('music_cutscene', { loop: true, volume: 0.4 });
+                const music = this.sound.add('music_cutscene', { loop: true, volume: 0.4 });
+                music.setMute(!settings.musicEnabled);
+                music.play();
             }
         }
 
@@ -81,7 +86,8 @@ class CutsceneScene extends Phaser.Scene {
         this.skipBtn.on('pointerover', () => this.skipBtn.setColor('#ffffff'));
         this.skipBtn.on('pointerout', () => this.skipBtn.setColor('#888888'));
         this.skipBtn.on('pointerdown', () => {
-            if (this.cache.audio.exists('select_sound')) {
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.cache.audio.exists('select_sound')) {
                 this.sound.play('select_sound', { volume: 0.5 });
             }
             this.endCutscene();
@@ -266,5 +272,24 @@ class CutsceneScene extends Phaser.Scene {
         if (this.skipBtn) {
             this.skipBtn.setPosition(width - 20, 30);
         }
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }

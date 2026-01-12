@@ -19,7 +19,10 @@ class CreditsScene extends Phaser.Scene {
 
         // Play endgame music
         if (this.cache.audio.exists('music_endgame')) {
-            this.sound.play('music_endgame', { loop: true, volume: 0.5 });
+            const settings = this.loadSettings();
+            const music = this.sound.add('music_endgame', { loop: true, volume: 0.5 });
+            music.setMute(!settings.musicEnabled);
+            music.play();
         }
 
         // Background
@@ -202,7 +205,7 @@ class CreditsScene extends Phaser.Scene {
 
         // Scroll credits up
         const totalHeight = yPos;
-        const scrollDuration = 15000; // 15 seconds to scroll
+        const scrollDuration = 60000; // 60 seconds to scroll
 
         this.tweens.add({
             targets: this.creditsContainer,
@@ -313,5 +316,24 @@ class CreditsScene extends Phaser.Scene {
     handleResize(gameSize) {
         // Restart scene on resize for proper layout
         this.scene.restart();
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }

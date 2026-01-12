@@ -21,7 +21,7 @@ const config = {
             debug: false
         }
     },
-    scene: [PreloaderScene, SplashScene, InfoScene, TitleScene, MenuScene, CutsceneScene, LevelScene, LevelCompleteScene, CreditsScene, UIScene],
+    scene: [PreloaderScene, SplashScene, InfoScene, TitleScene, OptionsScene, MenuScene, CutsceneScene, LevelScene, LevelCompleteScene, CreditsScene, UIScene],
     input: {
         activePointers: 3
     }

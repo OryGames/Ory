@@ -21,7 +21,8 @@ class LevelCompleteScene extends Phaser.Scene {
         const { width, height } = this.scale;
 
         // Play win sound
-        if (this.cache.audio.exists('win_sound')) {
+        const settings = this.loadSettings();
+        if (settings.soundEnabled && this.cache.audio.exists('win_sound')) {
             this.sound.play('win_sound', { volume: 0.6 });
         }
 
@@ -37,7 +38,10 @@ class LevelCompleteScene extends Phaser.Scene {
         });
 
         if (!alreadyPlaying) {
-            this.sound.play('music_levelselect', { loop: true, volume: 0.2 });
+            const settings = this.loadSettings();
+            const music = this.sound.add('music_levelselect', { loop: true, volume: 0.2 });
+            music.setMute(!settings.musicEnabled);
+            music.play();
         }
 
         this.cameras.main.setBackgroundColor('#1a1a2e');
@@ -155,7 +159,8 @@ class LevelCompleteScene extends Phaser.Scene {
             .on('pointerover', () => btn.setFillStyle(0xf5a623))
             .on('pointerout', () => btn.setFillStyle(0xc47b17))
             .on('pointerdown', () => {
-                if (scene.cache.audio.exists('select_sound')) {
+                const settings = scene.loadSettings();
+                if (settings.soundEnabled && scene.cache.audio.exists('select_sound')) {
                     scene.sound.play('select_sound', { volume: 0.5 });
                 }
                 callback();
@@ -170,5 +175,24 @@ class LevelCompleteScene extends Phaser.Scene {
             fontFamily: 'Arial, sans-serif',
             color: '#ffffff'
         }).setOrigin(0.5);
+    }
+
+    loadSettings() {
+        const defaults = {
+            musicEnabled: true,
+            soundEnabled: true,
+            gridEnabled: false
+        };
+
+        try {
+            const saved = localStorage.getItem('ory_settings');
+            if (saved) {
+                return { ...defaults, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        return defaults;
     }
 }

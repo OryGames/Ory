@@ -80,6 +80,7 @@ class PreloaderScene extends Phaser.Scene {
         this.load.image('splash_portrait', './assets/sprites/splash_portrait.png');
         this.load.image('level_map', './assets/sprites/level_map.png');
         this.load.image('level_complete_bg', './assets/sprites/endmission.png');
+        this.load.image('options_bg', './assets/sprites/bgoptions.png');
 
         // --- SPRITESHEETS ---
         // Note: tileset and collectibles are NOT preloaded here because
