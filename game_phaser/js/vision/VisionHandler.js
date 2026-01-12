@@ -58,10 +58,23 @@ class VisionHandler {
 
     async startCamera() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Detect if mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            // Mobile uses back camera (environment), desktop uses front camera (user)
+            const facingMode = isMobile ? 'environment' : 'user';
+
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment', width: 640, height: 640 }
+                video: { facingMode: facingMode, width: 640, height: 640 }
             });
             this.videoElements.video.srcObject = stream;
+
+            // Mirror only for front camera (desktop) - back camera (mobile) should not be mirrored
+            if (!isMobile) {
+                this.videoElements.video.style.transform = 'scaleX(-1)';
+            } else {
+                this.videoElements.video.style.transform = 'none';
+            }
 
             return new Promise(resolve => {
                 this.videoElements.video.onloadedmetadata = () => {
