@@ -63,6 +63,16 @@ video {
     /* Mirror applied via JS based on device type */
 }
 
+#detection-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    /* Mirror applied via JS based on device type to match video */
+}
+
 /* Animated Scan Line */
 #scan-line {
     position: absolute;
@@ -139,4 +149,51 @@ button {
     color: #00d4bb;
     font-size: 14px;
     min-height: 20px;
+}
+
+/* Mobile Landscape Adjustments for Camera Overlay */
+@media (max-height: 500px) and (orientation: landscape) {
+    .camera-box {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+        padding: 15px;
+        max-height: 95vh;
+        max-width: 90vw;
+    }
+
+    .video-wrapper {
+        width: 60vh;
+        height: 60vh;
+        max-width: 300px;
+        max-height: 300px;
+        margin: 0;
+    }
+
+    .controls {
+        flex-direction: column;
+        margin-top: 0;
+        gap: 10px;
+    }
+
+    .camera-box h2 {
+        font-size: 20px;
+    }
+
+    .camera-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #status-text {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
 }

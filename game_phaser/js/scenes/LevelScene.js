@@ -185,7 +185,40 @@ class LevelScene extends Phaser.Scene {
         // Draw grid overlay if enabled
         this.drawGridOverlay();
 
+        // Handle resize/orientation change (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
+        this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
+
         this.startTime = Date.now();
+    }
+
+    handleResize(gameSize) {
+        const { width, height } = gameSize;
+
+        // Update camera zoom based on new screen size
+        if (width > 1280) {
+            const zoomFactor = Math.min(2.0, 1.5 + (width - 1280) / (1920 - 1280) * 0.3);
+            this.cameras.main.setZoom(zoomFactor);
+        } else {
+            this.cameras.main.setZoom(1);
+        }
+
+        // Re-center camera on robot without losing game state
+        if (this.robot && this.robot.sprite) {
+            this.cameras.main.centerOn(this.robot.sprite.x, this.robot.sprite.y);
+        }
+
+        // Redraw grid overlay if enabled
+        if (this.gridGraphics) {
+            this.gridGraphics.destroy();
+            this.gridGraphics = null;
+            this.drawGridOverlay();
+        }
     }
 
     loadSettings() {

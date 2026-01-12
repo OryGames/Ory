@@ -116,6 +116,10 @@ class Robot {
 
             if (!this.scene.checkCollision(nextX, nextY)) {
                 console.log("Blocked at", nextX, nextY);
+                const settings = this.loadSettings();
+                if (settings.soundEnabled && this.scene.cache.audio.exists('blocked_sound')) {
+                    this.scene.sound.play('blocked_sound', { volume: 0.8 });
+                }
                 break;
             }
 
@@ -220,6 +224,10 @@ class Robot {
 
         if (!this.scene.checkCollision(targetX, targetY)) {
             console.log("Cannot land at", targetX, targetY);
+            const settings = this.loadSettings();
+            if (settings.soundEnabled && this.scene.cache.audio.exists('blocked_sound')) {
+                this.scene.sound.play('blocked_sound', { volume: 0.8 });
+            }
             this.isMoving = false;
             return;
         }

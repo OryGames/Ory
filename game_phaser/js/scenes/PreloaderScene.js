@@ -117,6 +117,7 @@ class PreloaderScene extends Phaser.Scene {
         this.load.audio('cmd_sound', './assets/audio/movement/cmd.mp3');
         this.load.audio('mov_sound', './assets/audio/movement/mov1.mp3');
         this.load.audio('get_sound', './assets/audio/movement/get.mp3');
+        this.load.audio('blocked_sound', './assets/audio/movement/blocked.mp3');
 
         // --- AUDIO: Music ---
         this.load.audio('music_title', './assets/audio/music/Ory_ContraaDengue.mp3');

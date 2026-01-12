@@ -49,8 +49,14 @@ class OptionsScene extends Phaser.Scene {
         // Fade in
         this.cameras.main.fadeIn(300, 0, 0, 0);
 
-        // Handle resize
+        // Handle resize (remove old listener first to prevent stacking)
+        this.scale.off('resize', this.handleResize, this);
         this.scale.on('resize', this.handleResize, this);
+
+        // Cleanup on scene shutdown
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
     }
 
     loadSettings() {
@@ -395,7 +401,11 @@ class OptionsScene extends Phaser.Scene {
             }
             this.cameras.main.fadeOut(300, 0, 0, 0);
             this.time.delayedCall(300, () => {
-                this.scene.start('TitleScene');
+                // Stop this scene and wake TitleScene to preserve music
+                this.scene.stop();
+                this.scene.wake('TitleScene');
+                // Fade TitleScene back in
+                this.scene.get('TitleScene').cameras.main.fadeIn(300, 0, 0, 0);
             });
         });
 
