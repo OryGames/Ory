@@ -1,7 +1,7 @@
 # Ory
 Inspirado pela comunidade aberta 'ScratchJr' (https://www.scratchjr.org/) e o incrível produto 'Osmo Coding' (https://www.playosmo.com/en/coding/), Ory é um projeto de jogo educativo interativo de lógica e introdução a programação para crianças, utilizando um ambiente lúdico e uma linguagem baseada em bloquinhos físicos de encaixar.
 
-<img src="res/20200413_144618.gif" height="300" >
+<img src="res/ory_alpha.gif" height="300" >
 
 > É um projeto sem fins lucrativos, de baixo custo de implantação e acessível mesmo para escolas e crianças com recursos bastante limitados.
 
